@@ -1,0 +1,888 @@
+Revisit consent button
+
+
+
+
+
+
+
+
+lablab.ai logo - Community innovating and building with artificial intelligence
+Search lablab.ai
+JoinAMDChallenge + Get $100 credits
+AI Hackathons
+AI Apps
+AI Tech
+AI Tutorials
+AI Articles
+NativelyAI
+Sponsor
+7
+
+User profile image
+Submission deadline
+Oct 6, 12:29 PM IST
+Live
+Results
+Online
+Saturday, September 26 2026 - 9:30 PM India Standard Time
+WeAreDevelopers x BAND present: Dark Factory (hackathon edition)
+The official hackathon of WeAreDevelopers World Congress North America, presented by BAND.
+🌎 Online Hackathon | 💻 Online Build: Sept 26 - Oct 5, 2026
+
+
+
+A virtual, global hackathon. Build from anywhere in the world.
+
+
+
+Dark Factory is the official hackathon of WeAreDevelopers World Congress North America, presented by BAND, but you don't need to be in San Jose to take part.
+
+
+
+For one week, you build a software factory in BAND Desktop: a band of coding agents that plans work, implements it and checks its own results.
+
+
+
+🎟️ Bonus for sign-ups: you are eligible for a free ticket to WeAreDevelopers World Congress North America in San Jose (Sep 23–25). If you do go, stop by the BAND booth: a surprise is waiting for you.
+
+Enrolled
+WeAreDevelopers x BAND present: Dark Factory (hackathon edition) event thumbnail
+About
+Challenge
+Partners
+Prizes
+How it works
+Event Schedule
+Community & Social Channels
+Speakers
+Speakers, Mentors & Judges
+Submissions
+Teams
+WeAreDevelopers x BAND present
+AI Dark Factory (hackathon edition)
+The official hackathon of WeAreDevelopers World Congress North America, presented by BAND.
+
+Dates
+Sep 26 – Oct 5, 2026
+Kickoff 09:00 PDT · Close 23:59 PDT
+Format
+Fully online · 1 week
+Open to everyone, anywhere
+Prize pool
+$6,000
+Cash, across two tracks
+Build a software factory in BAND Desktop: a band of coding agents that plans work, implements it, hands off evidence and checks its own results. Then use it to ship a clean-room clone of a product everyone knows.
+
+Two tracks, four graded stages, one week to build. What you submit is the factory, the run that produced the result, and the result.
+
+🎟️ Sign up for the hackathon and you are eligible for a free ticket to WeAreDevelopers World Congress North America in San Jose (Sep 23–25). A surprise is waiting for you at the BAND booth.
+The challenge
+Build an AI dark factory
+You build a software factory in BAND Desktop: a band of coding agents that plans work, implements it, hands off evidence, and independently checks its own results. You give it a job and decide whether to accept what comes back. What you submit is the factory, the run that produced the result, and the result.
+
+That is the promise of an AI dark factory — a software production process that keeps working without a person directing every step. Making the collaboration reliable is an engineering problem in its own right, and this hackathon is a concrete way to attack it. You design the team, its handoffs and its checks, then see whether it can build a service, repair failures, and extend what it built without breaking what already works.
+
+Two tracks
+Both are clean-room clones of a product everyone knows. Pick one and stay in it — you compete only against the track you chose.
+
+🍽️ tablekeeper
+
+A restaurant reservation system, like OpenTable
+
+The hard part: a table must never be double-booked, under concurrency, retries and time zones.
+
+💸 pocketful
+
+A wallet and payments app, like Venmo
+
+The hard part: money must never be created, destroyed or spent twice, under concurrent transfers, retries and rounding.
+
+Partners & technology
+Who is behind it and what you build with
+Presented by
+
+BAND
+BAND is the interaction layer for AI agents: a shared environment where agents built on any framework can communicate, exchange context, coordinate work, recruit other agents and involve humans.
+
+In this hackathon your band of coding agents lives in BAND Desktop, and the room it works in is part of your submission.
+
+BAND Hacker Guide
+Review BAND's hacker guide to understand the platform, get familiar with the building flow, and prepare your project for the hackathon.
+
+Hacker guide →
+BAND Desktop
+The app your band works in: sign in, install the CLI and the coding-agent plugin, run the readiness checks, and see a live board of agents, rooms, work items and decisions. macOS, Windows and Linux.
+
+docs.band.ai/jam →
+BAND
+A shared interaction layer for AI agents, designed to help agents communicate, coordinate, exchange context, and collaborate across tools and workflows.
+
+band.ai →
+BAND Documentation
+Learn how to connect agents to BAND, work with collaborative agent rooms, and explore BAND's core platform concepts.
+
+docs.band.ai →
+Connect Any Agent
+Connect existing agents to BAND's collaborative platform and enable multi-agent chat rooms, collaboration, and platform tools.
+
+Connect an agent →
+BAND Agent API
+Connect autonomous agents, recruit peers into chat rooms, and participate in agent-to-agent workflows.
+
+API reference →
+BAND SDK Setup
+Install the BAND SDK, configure your environment, and prepare your agents to connect to the platform. Adapters for Claude Code, Codex, LangGraph, CrewAI, Pydantic AI, Agno and more.
+
+SDK setup →
+🚀 Getting started
+Create your free BAND account (no card needed), download BAND Desktop, and join the BAND Discord for onboarding resources, announcements and builder support before kickoff.
+
+Create your free BAND account
+Download BAND Desktop
+Join the BAND Discord
+The official hackathon of
+
+WeAreDevelopers World Congress North America
+San Jose, Sep 23–25. The hackathon itself runs fully online, and every hackathon sign-up is eligible for a free ticket to the congress. BAND has a booth there, and a surprise is waiting for you at it.
+
+wearedevelopers.com
+Technology partners
+
+Docker
+Docker Sandboxes provide isolated, reproducible environments for building, testing, and running AI applications — spin up clean sandboxed containers in seconds, customize them with kits, and share consistent setups across your team.
+
+   
+Learn
+ 
+Benefits of Sandbox Environments — discover how Docker Sandboxes improve security, reproducibility, and developer velocity
+ 
+Get started with Docker Sandboxes — follow the official docs to create your first sandbox environment
+ 
+Customize Docker Sandboxes with kits — extend and tailor sandboxes with prebuilt kits for your workflow
+     
+ 
+Benefits of Sandbox Environments
+ 
+Get started with Docker Sandboxes
+ 
+Customize Docker Sandboxes with kits
+ 
+Featherless AI
+Featherless AI provides serverless inference for open-source models — one OpenAI-compatible API in front of 30,000+ open models (DeepSeek, Llama, Qwen, Mistral, Kimi and more), no GPU to rent, no per-token surprises. Point your coding agents, or any seat you build on the BAND SDK, at Featherless instead of a paid provider.
+
+Build with it
+Run the model behind a seat in your band
+Add open-source model inference to agent workflows
+Power reasoning, generation and specialized-model use cases
+Access
+Credits: $25 of Feather Per-Request credits per participant — no model size limit, context up to 256K
+Availability: up to 1,000 participants, first come, first served
+Redemption: the promo code and setup guide are emailed to registered participants shortly before kickoff
+Note: signup takes a card. If you do not plan to keep using Featherless after the hackathon, cancel before the next billing cycle.
+Featherless Tech Page
+Featherless Website
+Featherless Docs
+💡 Partner credits, promo codes and setup guides are provided directly by each technology partner and may depend on availability, eligibility and platform terms. lablab.ai helps coordinate access, but each platform manages its own credits, limits, billing and API keys.
+
+Rewards
+🏆 $6,000+ in prizes
+Split across the two tracks. You compete only against teams in the track you chose.
+
+🍽️ tablekeeper track
+🥇 First
+$1,500
+
+🥈 Second
+$1,000
+
+🥉 Third
+$500
+
+💸 pocketful track
+🥇 First
+$1,500
+
+🥈 Second
+$1,000
+
+🥉 Third
+$500
+
+When a place is awarded
+A place is awarded only if the track has enough eligible entries: at least one for first, four for second, six for third. Unawarded prizes are not redistributed.
+
+Case studies
+Winning entries are published as case studies with the team's permission: the task, the band, the key design decision, the verified result, the cost and the limitation.
+
+Featherless prize
+$300 in Featherless credits for the first winning team. Which track it applies to will be announced.
+
+🎟️ Every hackathon sign-up is eligible for a free ticket to WeAreDevelopers World Congress North America. Visit the BAND booth — a surprise is waiting for you.
+Please note: participation in lablab.ai hackathons is voluntary. Prizes and opportunities depend on eligibility, availability and third-party sponsors. Hackathon rules, prizes and terms may change or be canceled at our discretion. Submissions must be original and MIT-compliant. Prize distribution may take up to 90 days. Full details.
+
+Before you start building
+How it works
+How to participate
+The hackathon takes place online on the lablab.ai platform and the lablab.ai Discord server. Please register for both in order to participate. To join, click the Enroll button at the bottom of the page and read the Hackathon Guidelines, the Getting Started Guide and the lablab.ai Hackathon Rule Book.
+
+The hackathon is fully online and open to everyone, anywhere in the world.
+
+If you need help with Band Desktop, you can ask the Band team in the Band discord server
+
+Teams
+Teams consist of 1-6 people. If you don't have a team, don't worry. You can connect with other participants from all over the world on the dashboard or on the Discord server, where you can also find teammates and bounce around ideas.
+
+Submission requirements
+Everything your entry needs, in one list.
+
+Your band
+At least three distinct coding-agent seats in BAND Desktop, each with a mandate file. Seats may share a runtime and a model.
+A seat can be any runtime BAND supports, including one you build on the BAND SDK and run on your own machine, a cloud box or a CI runner.
+Models: use your Featherless credits or bring your own model-provider access.
+Your mandates must be generic This is important
+A mandate is the standing instruction you give a seat (agent). It says how that seat works: what it owns, how it takes and hands off work, when it rejects something. It must be generic. It cannot name anything specific to your track or the challenge: no endpoint paths, no field names, no error codes. The track's detail belongs in the task you paste into the room, not in a seat's standing instructions.
+
+The test: could you hand your mandates to a team building something completely different, and would they still make sense? If not, you have written a transcript of this problem rather than a factory.
+
+A mandate naming track-specific detail disqualifies the entry.
+
+Your repository
+One public GitHub repository a judge can clone without BAND Desktop membership.
+One folder per stage you completed — stage-1/ through stage-4/ — each a complete, buildable service. Submit only the stages you completed. Minimum to be eligible: a complete stage 1.
+Plus: your seat mandates, your factory description, and the export of the BAND Desktop room your band worked in .
+Your video
+Your video must include a recording of the BAND Desktop room that generated your solution, and a walkthrough.
+A video without the room recording disqualifies your team.
+Your service
+It must build and serve from a clean container with no outbound network. Test that before you submit — a service that doesn't start scores zero.
+CPU and memory caps, harness concurrency and per-request timeouts are published with the spec at kickoff.
+Disqualifiers at a glance
+A mandate that names track-specific detail
+A video without the BAND Desktop room recording
+A service that does not start from a clean container
+Submission form on lablab.ai
+📋 Basic information
+Project title
+Short description
+Long description
+Technology & category tags
+📸 Cover image and presentation
+Cover image
+Video presentation
+Slide presentation
+💻 Repository
+Public GitHub repository
+Judging criteria
+50%
+Factory
+Generic, effective and reusable: mandates another team could point at a different problem, how far through the four stages it got with code that meets the spec, and a FACTORY.md that is enough to stand it up — seat setup, design rationale, measured costs, and how it catches and recovers from bad work
+
+25%
+App
+What the factory built: a coherent, presentation-ready, responsive UI over maintainable code
+
+25%
+Agent Teamwork
+The seats did the work together, and without you.
+
+Collaboration: the seats really shared the work — review changed something, handoffs carried the whole task, and the code traces to the room.
+
+Autonomy: in the run you submit, the task you dispatch for each stage is the only human input — no steering, approvals or reruns
+
+Event Schedule
+Sep 26 9:30 PM India Standard Time
+Hackathon Kick-off
+
+Sep 26 9:35 PM India Standard Time
+lablab.ai Opening words
+
+Sep 26 9:40 PM India Standard Time
+Introduction to the Challenge
+
+Sep 26 10:30 PM India Standard Time
+Discord Q&A session
+
+Oct 6 12:29 PM India Standard Time
+End of Submissions!
+
+Stay in the loop
+Community & social channels
+Stay connected with the teams behind the hackathon and follow along for updates, highlights and future opportunities.
+
+BAND
+X · LinkedIn · GitHub · Discord · Website
+
+WeAreDevelopers
+World Congress North America
+
+Featherless AI
+X · Discord · YouTube · Website
+
+lablab.ai
+X · LinkedIn · Instagram · YouTube · Twitch · Discord · Website
+
+NativelyAI
+Website · LinkedIn · Discord
+
+
+Speakers, Mentors & Judges
+Andrea Marazzi
+Andrea Marazzi
+
+Founder & CEO of NativelyAI
+
+
+Akshat Sinha
+Akshat Sinha
+
+Senior Site Reliability Engineer, Rubrik
+
+
+Amit Kumar Singh
+Amit Kumar Singh
+
+AVP – Lead Data Engineer | AI & Data Platform Engineering
+
+
+Andrii Stetsenko
+Andrii Stetsenko
+
+Chief Architect, Wyllo
+
+
+Anil Mandloi
+Anil Mandloi
+
+Senior Software Engineer – American Express
+
+
+Anish Gupta
+Anish Gupta
+
+Product Manager at Microsoft
+
+
+Ansh Bilimoria
+Ansh Bilimoria
+
+Senior Software Engineer, Meta
+
+
+Antoine Balliet
+Antoine Balliet
+
+Context & AI Engineer
+
+
+Arjun Gopichander Ravichander
+Arjun Gopichander Ravichander
+
+Software Engineer, Walmart Inc.
+
+
+Artem Miloserdov
+Artem Miloserdov
+
+Senior Product Manager
+
+
+Bhargavi Vepuri
+Bhargavi Vepuri
+
+Director, Technology Lead at Prudential Financial
+
+
+Dharmendra Singh
+Dharmendra Singh
+
+Senior Software Engineering Manager
+
+
+Hardik Nahata
+Hardik Nahata
+
+Senior Machine Learning Engineer, PayPal
+
+
+Haris Jalal
+Haris Jalal
+
+SWE AI
+
+
+Harshit Gupta
+Harshit Gupta
+
+Management Consultant, McKinsey & Company
+
+
+Kumar Shivendu
+Kumar Shivendu
+
+Search & Distributed Systems Engineer
+
+
+Mudit Saraf
+Mudit Saraf
+
+Software Engineer at Meta
+
+
+Nalini Garg
+Nalini Garg
+
+Associate Vice President
+
+
+Neeraj Kumar Singh Beshane
+Neeraj Kumar Singh Beshane
+
+Staff Security Infrastructure Engineer, venture-backed embedded-fintech
+
+
+Nicole Yuning Hao
+Nicole Yuning Hao
+
+Founding Engineer at Janet AI (YC S25)
+
+
+Piyush Dhar Diwan
+Piyush Dhar Diwan
+
+Director of Software Engineering
+
+
+Rahul Nambiar
+Rahul Nambiar
+
+Founder (AI evaluation startup); ex-Senior Staff SWE at AWS & Meta
+
+
+Rakesh S Rai
+Rakesh S Rai
+
+Enterprise Architect
+
+
+Ramachandra Nalam
+Ramachandra Nalam
+
+Data Engineer at Meta
+
+
+Sachidananda Singh
+Sachidananda Singh
+
+Senior Engineering Manager, Hims & Hers Health
+
+
+Sandeep Vattikuti
+Sandeep Vattikuti
+
+Principal Software Engineer / Platform Architect
+
+
+Shaktesh Pandey
+Shaktesh Pandey
+
+AI Engineer | GenAI Systems | RAG Architect | LLMOps
+
+
+Shweta Chauhan
+Shweta Chauhan
+
+Software Development Engineer II, Amazon Robotics | IEEE Senior Member
+
+
+Suresh Kumar Gunasekaran
+Suresh Kumar Gunasekaran
+
+Senior Software Engineer
+
+
+Udit Gupta
+Udit Gupta
+
+Principal Engineer - Cloud and Network Security, Palo Alto Networks
+
+
+Urvi Bhanushali
+Urvi Bhanushali
+
+Software Engineer
+
+
+Vasu Raj Jain
+Vasu Raj Jain
+
+Senior Software Engineer @Amazon Ads
+
+
+Vipul Jain
+Vipul Jain
+
+Software Engineer, Meta Applied AI
+
+
+Submitted concepts, prototypes and pitches
+Submissions from the teams participating in the WeAreDevelopers x BAND present: Dark Factory (hackathon edition) event and making it to the end 👊
+
+AI Educational development system
+AI Educational development system
+TableKeeper is a smart restaurant table management platform that simplifies reservations, table allocation, and customer management. It provides restaurants with an organized way to track table availability
+
+hackers
+application badge
+AI Studio
+Bright Data Scraping Browser
+Chroma
+
+Play
+Pocketful
+Pocketful
+Pocketful is a payment and wallet service built entirely by a multi-agent software factory in BAND, where autonomous agents architected, implemented, tested, reviewed, and refined the application across four progressively complex stages.
+
+SamSZN
+application badge
+Band Intergrations
+Claude Code
+Codex
+
+Play
+TableKeeper: Reservation Safety Factory
+TableKeeper: Reservation Safety Factory
+A BAND-built restaurant reservation system that prevents double-booking through deterministic time-overlap and capacity checks, with a live UI, automated tests, Docker support, and a public Railway deployment.
+
+TableKeeper
+Band Agentic Mesh
+Claude Code
+ChatGPT
+
+Play
+Tablekeeper: A Restaurant Booking Factory
+Tablekeeper: A Restaurant Booking Factory
+Four coding agents in BAND built and tested a restaurant reservation service with table booking, recurring visits and seating recovery. Tablekeeper includes four buildable stages and the evidence behind them.
+
+SoloRun
+application badge
+Band Intergrations
+Band Agentic Mesh
+Band Control Plane
+
+Play
+Obsidian Foundry: Self-Verifying Dark Factory
+Obsidian Foundry: Self-Verifying Dark Factory
+Four Claude Code agents in Band Desktop built a Venmo-style wallet in 4 stages from one prompt. A tester that never sees the code writes tests from the spec, and the reviewer accepts only on independent evidence.
+
+dora
+Claude Code
+Band Agentic Mesh
+Anthropic Claude
+
+Play
+Fail Closed
+Fail Closed
+A band of four coding agents in which no seat can both produce evidence and accept it. The auditor is created with its editing tools denied, so it cannot change what it judges, and the gate publishes what it refused alongside whether refusing mattered.
+
+Fail Closed
+Claude Code
+Anthropic Claude
+Band Agentic Mesh
+
+Play
+Tablekeeper by Factory Trio
+Tablekeeper by Factory Trio
+A three-seat BAND factory designs, builds, rejects, repairs, and verifies a restaurant reservation service with a traceable room log and reproducible container checks.
+
+Factory Trio
+Band Agentic Mesh
+Codex
+
+Play
+Moyu Pocketful Factory
+Moyu Pocketful Factory
+Autonomous bitemporal P2P payments & wallet engine built in BAND Desktop by a 3-agent swarm (Architect, Coder, Auditor). Features strict double-entry balance conservation, 100% test pass rate, and genuine adversarial review with zero human code.
+
+Moyu Sentinel
+Band Agentic Mesh
+Band Control Plane
+Band Intergrations
+
+Play
+AI Dark-Factory: Pocketful clean-room clone
+AI Dark-Factory: Pocketful clean-room clone
+Four agents on BAND (Claude, MiMo, local Qwen 80B) built Pocketful, a wallet that never creates, destroys or double-spends money. Custom band-sdk adapter, double-entry ledger, scoped idempotency and 82 passing tests, coordinated in one shared room.
+
+Rookie Riot
+Claude Code
+Qwen3
+Band Intergrations
+
+Play
+Four Seats Factory — Evidence Before Acceptance
+Four Seats Factory — Evidence Before Acceptance
+Four autonomous agents built all four Pocketful stages from one human message. They rejected two green candidates — one crashed after 4,761 reads while every public check passed — and accepted only evidence they had reproduced.
+
+No Seat Accepts Its Own Work
+Anthropic Claude
+Claude Code
+Band Agentic Mesh
+
+Play
+Pocketful Dark Factory
+Pocketful Dark Factory
+Three agent seats that plan, build and independently reject each other's work. One human dispatch, then no input until the report. Stage 1 of the pocketful track: 147/147 checks in a sealed container, and every commit authored by a seat rather than by me.
+
+RDPT
+Claude Code
+Anthropic Claude
+
+Play
+Root Cause AI Investigator
+Root Cause AI Investigator
+Autonomous multi-modal AI engine that transforms messy server logs, CSVs, and support tickets into verifiable causal chains using dual-pass Llama 3 reasoning, baseline z-scores, and automated red-team verification.
+
+AgentX
+application badge
+Groq
+Streamlit
+Github Copilot
+
+Play
+Pocketful: a dark factory that proves its own work
+Pocketful: a dark factory that proves its own work
+Four Band Desktop agents built all four Pocketful stages from one message in 4.5 hours. They turn the spec into 328 numbered requirements and prove every one with independent evidence before anything ships.
+
+32GB_RAM_YAY
+Band Agentic Mesh
+Band Intergrations
+Claude Code
+
+Play
+Purrallel Processing: Tablekeeper Factory
+Purrallel Processing: Tablekeeper Factory
+Three coding agents coordinate in BAND to plan, build, and independently verify Tablekeeper, a restaurant reservation service. Completed Stages 1 and 2 passed all 145 official harness checks.
+
+Midnight Purr Request
+Band Intergrations
+Codex
+
+Play
+Dark Factory — the band that refuses its own work
+Dark Factory — the band that refuses its own work
+Three coding agents in one BAND room build a payments API. Two of the three cannot write code — their job is to refuse handoffs that do not conform.
+
+Dark Factory
+Band Intergrations
+Featherless
+Claude Code
+
+Play
+bandisworstforme
+bandisworstforme
+ive been trying to get band to work for so long but the agents just wont work
+
+Volco
+Band Intergrations
+
+Play
+Tablekeeper: An Agent-Built Reservation System
+Tablekeeper: An Agent-Built Reservation System
+A five-agent software factory that built and verified a restaurant reservation system across four stages, including a responsive website, recurring bookings and atomic seating repairs, in about two hours.
+
+Cat in Town
+application badge
+ChatGPT
+Vercel
+Codex
+
+Play
+AI Based Skill Lab Simulator and Safety Trainer
+AI Based Skill Lab Simulator and Safety Trainer
+Students practise industrial tasks in a simulator, get AI feedback, and earn competency scores. Trainers track progress and get reports. It now includes immersive 3D environments for physical safety tasks and terminal sandboxes for IT scenarios.
+
+Code Blooded
+Gemini AI
+
+Play
+Pocketful: Autonomous Zero-Sum Dark Factory
+Pocketful: Autonomous Zero-Sum Dark Factory
+A clean-room bitemporal payments engine built 100% autonomously in BAND Desktop with zero-sum balance conservation, self-healing race interception, and SHA-256 audit chaining.
+
+Pocketful Dark Factory
+application badge
+AgentOps
+AI/ML API
+Antigravity
+
+Play
+AuraHealth OS — ICU Dispatch & Patient Wallet
+AuraHealth OS — ICU Dispatch & Patient Wallet
+AuraHealth OS is an AI Dark Factory built in BAND Desktop that unifies emergency ICU bed reservation with an atomic health wallet co-pay ledger, guaranteeing zero double-booking under concurrency.
+
+Mahpara Siddique
+Band Intergrations
+Featherless
+
+Play
+PHANTOM DARK FACTORY: Lights-Out Software Engine
+PHANTOM DARK FACTORY: Lights-Out Software Engine
+A fully autonomous, lights-out software factory orchestrating coding agents from raw issue to verified PR with zero human intervention, strict test-harness decoupling, and self-healing resilience.
+
+PHANTOM GRID
+AI/ML API
+Coral Protocol
+HuggingFace Hub
+
+Play
+Proofline: Tablekeeper
+Proofline: Tablekeeper
+A BAND agent factory builds reliable reservations and seating repair, so restaurants can keep guest promises when the floor changes.
+
+Proofline
+Band Agentic Mesh
+Codex
+
+Play
+POCKETFORGE.AI
+POCKETFORGE.AI
+PocketForge AI is an autonomous AI Dark Factory that codes, red-teams, auto-repairs, and cryptographically audits software without human intervention.
+
+code_warrior
+application badge
+AgentOps
+AI/ML API
+AI Studio
+
+Play
+Factory Zero
+Factory Zero
+An autonomous AI software factory that builds, attacks, repairs, and verifies financial software before allowing it to ship.
+
+Factory Zero
+Band Agentic Mesh
+Codex
+OpenAI
+
+Play
+Pocketful: Four Agents in BAND
+Pocketful: Four Agents in BAND
+Four Codex agents build and independently test a wallet application in BAND, preserving commits, room history and reproducible checks.
+
+signalandspark
+Codex
+Band Agentic Mesh
+
+Play
+Tablekeeper — Figueira Dark Factory
+Tablekeeper — Figueira Dark Factory
+A restaurant booking service built by three collaborating agents in BAND, with independent review and a traceable path from specification to tested code.
+
+FIGUEIRA
+Band Agentic Mesh
+Codex
+
+Play
+Tablekeeper: Double-Booking Is Impossible
+Tablekeeper: Double-Booking Is Impossible
+A restaurant booking engine where double-booking a table is physically impossible — enforced by a Postgres exclusion constraint, proven live by a 50-way booking race, and gated in CI by ShipScore.
+
+Cubiczan
+application badge
+Vercel
+
+Play
+L'Étoile Noire: Executive Tablekeeper
+L'Étoile Noire: Executive Tablekeeper
+An enterprise-grade floor management, station matrix, and live order dispatch system built with Python, Flask, and Modern Glassmorphism UI for high-end hospitality venues.
+
+TensorCraft
+application badge
+Vercel
+Gemini 3 Flash
+
+Play
+Teams: WeAreDevelopers x BAND present: Dark Factory (hackathon edition)
+Check out the roster and find teams to join
+
+ARCLIGHT
+ARCLIGHT
+
+ARCLIGHT is building an AI-powered surveillance and security platform for real-time threat detection, object tracking, restricted-zone monitoring, vehicle and number-plate detection, and intelligent alerts. We’re looking for passionate developers, AI/ML enthusiasts, and cybersecurity members to help build and deploy the solution.
+
+rakshit_76
+shrey9595
+vraj_shiroya
+Jayt69
+Harsh Pansuriya
+Devarsh
+CodeSwarm
+CodeSwarm
+
+CodeSwarm is building a multi-agent software engineering system where specialised AI agents collaborate to plan features, generate code, create and run tests, review failures, fix defects, and validate the final implementation. We want to build a practical autonomous development workflow with planner, developer, QA and reviewer agents, including tool use, execution feedback and self-correction. Looking for teammates interested in AI agents, Python, LLMs, software engineering, testing, DevOps or frontend development.
+
+Rishikesan Kirupanantha
+Larp Larb
+Larp Larb
+
+Sandbox for tech new comer
+
+Thanithpol.T
+Team Qbit
+Team Qbit
+
+TBD just braining now
+
+aliibtisam1001
+Umair091
+View all teams
+Footer navigation
+Community innovating and building with artificial intelligence
+Unlocking state-of-the-art artificial intelligence and building with the world's talent
+
+LinkedIn
+Twitter/X
+Instagram
+Discord
+YouTube
+Twitch
+Other group brands:
+
+https://nativelyai.com
+Links
+AI Tech
+AI Hackathons
+AI Tutorials
+AI Applications
+NativelyAI
+AI Articles
+Leaderboard
+Writers
+lablab
+About
+Brand
+Hackathon Guidelines
+Terms of Use
+Code of Conduct
+Privacy Policy
+Security
+Get in touch
+Discord
+Sponsor
+Cooperation
+Contribute
+Send email
+© 2026 NativelyAI Inc. All rights reserved.
+
+3.74.1
+
+
+Help
+
+Approved
+3521
+
+
+Team Dashboard
+Submit Project

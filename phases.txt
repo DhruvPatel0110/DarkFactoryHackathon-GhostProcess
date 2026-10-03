@@ -1,0 +1,1408 @@
+================================================================================
+     GHOSTPROCESS — COMPLETE PHASE-BY-PHASE BUILD GUIDE
+     From Zero to Submitted | Pocketful Track
+     Theme: Black Primary + Red Secondary
+================================================================================
+
+This document walks you through EVERY step from a blank computer to a
+submitted, working GhostProcess dark factory. Nothing is assumed.
+
+================================================================================
+  PHASE 0 — ACCOUNTS, DOWNLOADS & PREREQUISITES
+  "Get every tool on your machine before writing a single line"
+  Estimated time: 30-45 minutes
+================================================================================
+
+0.1 ACCOUNTS TO CREATE (do these first, some take time to verify)
+-----------------------------------------------------------------
+
+  [ ] BAND Account
+      Go to: https://app.band.ai
+      Click "Sign Up" → use GitHub or Google SSO
+      This is your agent platform. Free, no card needed.
+      KEEP THIS TAB OPEN — you'll need it for Band Desktop login.
+
+  [ ] Google AI Studio Account (for Gemini 2.5 Flash — 100% FREE!)
+      Go to: https://aistudio.google.com
+      Sign in with your Google account
+      Click "Get API key" → "Create API key in new project"
+      100% FREE TIER: 15 Requests/Min, 1,500 Requests/Day, 1M context
+      ABSOLUTELY NO CREDIT CARD REQUIRED!
+      Save your API key — you'll use it as GEMINI_API_KEY.
+
+  [ ] Groq Cloud Account (OPTIONAL BACKUP & RED-TEAM — 100% FREE!)
+      Go to: https://console.groq.com
+      Sign up with GitHub or Google
+      Click "API Keys" → "Create API Key"
+      100% FREE TIER: Llama 3.3 70B & Qwen 2.5 32B at blazing speed
+      ABSOLUTELY NO CREDIT CARD REQUIRED!
+      Save your API key — you'll use it as GROQ_API_KEY.
+
+  [ ] lablab.ai Account
+      Go to: https://lablab.ai
+      Sign up (if not already done)
+      Click "Enroll" on the Dark Factory hackathon page
+      This is where you'll submit your project
+
+  [ ] GitHub Account (you probably have this)
+      Create a new PUBLIC repository: ghostprocess-pocketful
+      Initialize with README.md and MIT license
+      Clone it locally:
+      
+      cd F:\Dhruv's\Hackathon\DarkFactory-GhostProcess
+      git clone https://github.com/YOUR_USERNAME/ghostprocess-pocketful.git
+
+  [ ] Featherless AI Account (OPTIONAL — NOT NEEDED)
+      Go to: https://featherless.ai
+      NOTE: Featherless gives $25 credits, but signup requires a credit card.
+      Since you want 100% FREE with ZERO cards, you do NOT need this!
+      Google AI Studio (Gemini) + Groq are 100% free without any card.
+
+  [ ] BAND Discord
+      Join: https://discord.gg/band (look for the invite on band.ai)
+      This is your LIFELINE for BAND Desktop support
+      Introduce yourself, ask questions, don't be shy
+
+  [ ] lablab.ai Discord
+      Join: the lablab.ai Discord (link on hackathon page)
+      For hackathon-specific questions and team finding
+
+
+0.2 SOFTWARE TO INSTALL
+-----------------------
+
+  [ ] Python 3.11+
+      Download: https://www.python.org/downloads/
+      IMPORTANT during install: CHECK "Add Python to PATH"
+      Verify:
+        python --version
+        pip --version
+
+  [ ] Node.js 20+ (Optional — only needed for Phase 5 frontend)
+      Download: https://nodejs.org/ (LTS version)
+      Verify:
+        node --version
+        npm --version
+
+  [ ] Git (you probably have this)
+      Download: https://git-scm.com/download/win
+      Verify:
+        git --version
+
+  [ ] Docker Desktop for Windows
+      Download: https://www.docker.com/products/docker-desktop/
+      Install → Enable WSL 2 backend during setup
+      Start Docker Desktop and let it finish initializing
+      Verify:
+        docker --version
+        docker run hello-world
+
+  [ ] Python Virtual Environment & Free Agent SDKs
+      Set up your local Python virtual environment:
+        cd "F:\Dhruv's\Hackathon\DarkFactory-GhostProcess"
+        python -m venv venv
+        .\venv\Scripts\Activate.ps1
+      Install all required libraries for the autonomous agents and FastAPI:
+        pip install band-sdk google-genai groq pydantic httpx pytest pytest-asyncio uvicorn fastapi sqlalchemy aiosqlite
+      Verify:
+        python -c "import band; import google.genai; print('BAND & Gemini SDKs Ready!')"
+
+  [ ] BAND Desktop (the agent collaboration platform)
+      Download for Windows:
+        https://downloads.band.ai/desktop/latest/windows/jam-windows-x64-setup.exe
+      Install the .exe
+      Launch Band Desktop
+      Click "Sign in with browser" → logs you into your free BAND account
+
+  [ ] VS Code (your editor — you probably have this)
+      Extensions to install:
+        - Python (Microsoft)
+        - Docker (Microsoft)
+        - REST Client (Huachao Mao) — for testing APIs
+        - SQLite Viewer — for inspecting your database
+
+  [ ] A screen recorder
+      Options:
+        - OBS Studio (free, best quality)
+        - Windows Game Bar (Win+G, built-in, good enough)
+        - ShareX (free, lightweight)
+      You NEED this to record the BAND Desktop room
+      A video WITHOUT the room recording = DISQUALIFIED
+
+
+0.3 VERIFY EVERYTHING WORKS
+----------------------------
+
+  Open PowerShell and run each of these:
+
+    python --version          # Should show 3.11+
+    pip --version             # Should work
+    git --version             # Should work
+    docker --version          # Should work
+    python -c "import band, google.genai; print('Core Agent SDKs Installed!')"
+
+  Open BAND Desktop:
+    - Should show you logged in
+    - Should show the onboarding checklist
+    - "Terminal CLI is installed" should be green (or install it)
+
+  If anything fails here, FIX IT NOW. Don't proceed with broken tools.
+
+
+================================================================================
+  PHASE 1 — BAND DESKTOP SETUP & PYTHON AGENT SDK INTEGRATION
+  "Get the factory floor operational — 100% Free"
+  Estimated time: 30-45 minutes
+================================================================================
+
+1.1 BAND DESKTOP ONBOARDING
+-----------------------------
+
+  Open Band Desktop. You will see the main dashboard and agent mesh shell.
+
+  Step A: CLI Installation
+    - Band Desktop checks if the `band` CLI is installed on Windows
+    - If NOT installed: click the "Install CLI" button in Band Desktop
+    - After install, click "Recheck"
+    - The "Terminal CLI is installed" check should turn green
+    - Verify in PowerShell:
+        band --version
+
+  Step B: Verify Local Daemon
+    - Band Desktop runs a local background daemon (`jamd` or band core)
+    - Ensure Band Desktop shows you signed in with your free BAND account
+    - Local SDK agents connect directly to this daemon on localhost
+
+1.2 CONFIGURE YOUR 100% FREE AI KEYS
+-------------------------------------
+
+  You do NOT need paid API keys or expensive Claude subscriptions.
+  GhostProcess runs entirely on Google Gemini 2.5 Flash via Google AI Studio,
+  with optional Groq Cloud backup.
+
+  In PowerShell (or add to your `.env` file):
+    # Set your Google AI Studio Free API Key
+    $env:GEMINI_API_KEY = "AIzaSy..."
+
+    # Optional: Set Groq Cloud Free API Key
+    $env:GROQ_API_KEY = "gsk_..."
+
+  Test that Gemini is functioning:
+    python -c "from google import genai; client = genai.Client(); response = client.models.generate_content(model='gemini-2.5-flash', contents='Say hello from GhostProcess!'); print(response.text)"
+
+1.3 CREATE YOUR FIRST AUTONOMOUS AGENT (Connection Test)
+---------------------------------------------------------
+
+  Before writing full pipelines, verify that a Python script using `band-sdk`
+  can connect to Band Desktop and post to a room.
+
+  Step A: Create a test script `test_band_agent.py`:
+  ─────────────────────────────────────────────────────────────
+  import asyncio
+  import os
+  from google import genai
+
+  # Simple test agent connecting to BAND
+  async def run_test_agent():
+      print("Connecting to BAND platform via SDK...")
+      # Initialize Gemini Free client
+      gemini_client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+      
+      # Generate a test greeting
+      response = gemini_client.models.generate_content(
+          model="gemini-2.5-flash",
+          contents="You are Architect agent for GhostProcess. Post a short 1-line hello to the BAND room."
+      )
+      print(f"Agent response: {response.text.strip()}")
+      print("SUCCESS: 100% Free Gemini AI is ready to power BAND agents!")
+
+  if __name__ == "__main__":
+      asyncio.run(run_test_agent())
+  ─────────────────────────────────────────────────────────────
+
+  Step B: Run it:
+    python test_band_agent.py
+
+  Step C: Check Band Desktop:
+    - Create a room called "ghostprocess-factory" in Band Desktop
+    - You'll see your room ready to host all 4 agent seats
+
+1.4 UNDERSTAND PROJECT_CONTEXT.md
+-----------------------------------
+
+  Instead of paid proprietary agent instruction files like `CLAUDE.md`,
+  GhostProcess uses an open `PROJECT_CONTEXT.md` that all 4 Python agents
+  read dynamically when building and auditing the application.
+
+  Create this file now:
+
+  File: ghostprocess-pocketful/PROJECT_CONTEXT.md
+  ───────────────────────────────────────
+  # Project: GhostProcess Pocketful
+
+  This is a Pocketful (payments/wallet) implementation for the
+  Dark Factory hackathon.
+
+  ## Tech Stack
+  - Python 3.11+ with FastAPI
+  - SQLite with SQLAlchemy (async)
+  - Pydantic v2 for validation
+  - pytest for testing
+  - Docker for containerization (python:3.11-slim base)
+
+  ## Non-Negotiable Invariants
+  - NEVER use float for monetary values. Use decimal.Decimal always.
+  - All amounts stored as TEXT in the database
+  - Strict double-entry bookkeeping: every transfer has exactly one DEBIT and one CREDIT
+  - sum(all journal entries) == 0 at all times across all wallets
+  - Every write endpoint must support idempotency keys (no duplicate transfers on retry)
+  - All database operations must be wrapped in atomic transactions
+  ───────────────────────────────────────
+
+
+================================================================================
+  PHASE 2 — PROJECT SCAFFOLDING & REPOSITORY STRUCTURE
+  "Build the skeleton before the muscles"
+  Estimated time: 20-30 minutes
+================================================================================
+
+2.1 CREATE THE REPOSITORY STRUCTURE
+-------------------------------------
+
+  Inside your cloned repo (ghostprocess-pocketful/), create:
+
+  ghostprocess-pocketful/
+  ├── PROJECT_CONTEXT.md            # Architecture rules & invariants
+  ├── FACTORY.md                    # Factory description (write later)
+  ├── README.md                     # Project overview
+  ├── agents/                       # 100% FREE autonomous Python seats
+  │   ├── config.py                 # Env vars, keys, model configs
+  │   ├── gemini_client.py          # Gemini free API client + 15 RPM pacer
+  │   ├── architect.py              # Seat 1 agent loop
+  │   ├── coder.py                  # Seat 2 agent loop (code + tests)
+  │   ├── ghost_auditor.py          # Seat 3 adversarial red-team loop
+  │   ├── gatekeeper.py             # Seat 4 judge verification loop
+  │   └── run_factory.py            # Master launcher for all 4 seats
+  ├── mandates/                     # Agent mandate files
+  │   ├── architect.md              # Seat 1 mandate
+  │   ├── coder.md                  # Seat 2 mandate
+  │   ├── ghost-auditor.md          # Seat 3 mandate
+  │   └── gatekeeper.md             # Seat 4 mandate
+  ├── room-export/                  # BAND room export (after run)
+  ├── stage-1/                      # Stage 1 code (agents will fill this)
+  │   ├── Dockerfile
+  │   ├── requirements.txt
+  │   ├── app/
+  │   │   ├── __init__.py
+  │   │   ├── main.py
+  │   │   ├── config.py
+  │   │   ├── database.py
+  │   │   ├── models.py
+  │   │   ├── schemas.py
+  │   │   ├── routes/
+  │   │   │   ├── __init__.py
+  │   │   │   ├── wallets.py
+  │   │   │   ├── transfers.py
+  │   │   │   ├── state.py
+  │   │   │   └── health.py
+  │   │   └── services/
+  │   │       ├── __init__.py
+  │   │       ├── wallet_service.py
+  │   │       └── transfer_service.py
+  │   └── tests/
+  │       ├── __init__.py
+  │       ├── conftest.py
+  │       ├── test_wallets.py
+  │       ├── test_transfers.py
+  │       └── test_idempotency.py
+  └── stage-2/                      # Stage 2 (stretch goal)
+      └── ...
+
+  PowerShell commands to create this structure:
+
+    cd "F:\Dhruv's\Hackathon\DarkFactory-GhostProcess\ghostprocess-pocketful"
+
+    # Create directories
+    mkdir agents
+    mkdir mandates
+    mkdir room-export
+    mkdir stage-1
+    mkdir stage-1\app
+    mkdir stage-1\app\routes
+    mkdir stage-1\app\services
+    mkdir stage-1\tests
+
+    # Create empty __init__.py files
+    New-Item stage-1\app\__init__.py -ItemType File
+    New-Item stage-1\app\routes\__init__.py -ItemType File
+    New-Item stage-1\app\services\__init__.py -ItemType File
+    New-Item stage-1\tests\__init__.py -ItemType File
+
+
+2.2 WRITE THE MANDATE FILES
+------------------------------
+
+  These are the CRITICAL files. They define your factory.
+  They MUST be generic — no mention of "Pocketful", wallets, transfers.
+
+  Copy the mandates from approach.txt Section 5 into these files:
+    mandates/architect.md     → Section 5.1 mandate
+    mandates/coder.md         → Section 5.2 mandate
+    mandates/ghost-auditor.md → Section 5.3 mandate
+    mandates/gatekeeper.md    → Section 5.4 mandate
+
+  SELF-CHECK: Read each mandate and ask:
+    "Could I hand this to a team building a restaurant booking system
+     and would it still make sense?"
+  If YES → good.
+  If NO → it's too specific. Remove the specific parts.
+
+
+2.3 CREATE THE INITIAL DOCKERFILE
+------------------------------------
+
+  File: stage-1/Dockerfile
+  ─────────────────────────
+  FROM python:3.11-slim
+
+  WORKDIR /app
+
+  # Install dependencies
+  COPY requirements.txt .
+  RUN pip install --no-cache-dir -r requirements.txt
+
+  # Copy application code
+  COPY app/ ./app/
+
+  # Expose port
+  EXPOSE 8000
+
+  # Run the server
+  CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+  ─────────────────────────
+
+
+2.4 CREATE requirements.txt
+------------------------------
+
+  File: stage-1/requirements.txt
+  ────────────────────────────────
+  fastapi==0.115.0
+  uvicorn[standard]==0.30.0
+  sqlalchemy[asyncio]==2.0.35
+  aiosqlite==0.20.0
+  pydantic==2.9.0
+  httpx==0.27.0
+  pytest==8.3.0
+  pytest-asyncio==0.24.0
+  ────────────────────────────────
+
+
+2.5 INITIAL GIT COMMIT
+-------------------------
+
+  cd "F:\Dhruv's\Hackathon\DarkFactory-GhostProcess\ghostprocess-pocketful"
+  git add -A
+  git commit -m "scaffold: project structure, mandates, Dockerfile"
+  git push origin main
+
+
+================================================================================
+  PHASE 3 — DRY RUN: TEST THE FACTORY WITH A SIMPLE TASK
+  "Never test your parachute for the first time on a real jump"
+  Estimated time: 45-90 minutes
+================================================================================
+
+This phase is CRUCIAL. You test the 4-agent pipeline with a TRIVIAL task
+before dispatching the real Pocketful task. This saves you from wasting
+your limited time debugging factory issues during the real run.
+
+3.1 LAUNCH THE 4 AUTONOMOUS PYTHON AGENTS
+-------------------------------------------
+
+  Each seat is a Python process using the BAND Python SDK (`band-sdk`)
+  and Google Gemini 2.5 Flash (100% Free).
+
+  You have two easy ways to run them:
+
+  OPTION A: Single Command Master Runner (RECOMMENDED):
+    Open PowerShell:
+      cd "F:\Dhruv's\Hackathon\DarkFactory-GhostProcess\ghostprocess-pocketful"
+      python agents/run_factory.py
+
+    This starts all 4 agent tasks asynchronously:
+    - Architect connects and waits for task
+    - Coder connects and waits for Architect handoff
+    - Ghost Auditor connects and prepares red-team harness
+    - Gatekeeper connects and stands by to judge evidence
+
+  OPTION B: 4 Separate Terminal Tabs (Great for monitoring live logs):
+    Tab 1 (Architect):
+      python agents/architect.py
+
+    Tab 2 (Coder):
+      python agents/coder.py
+
+    Tab 3 (Ghost Auditor):
+      python agents/ghost_auditor.py
+
+    Tab 4 (Gatekeeper):
+      python agents/gatekeeper.py
+
+  CHECK IN BAND DESKTOP:
+    - Look at your "ghostprocess-factory" room in BAND Desktop
+    - All 4 agents should show as "Connected"
+    - The room log is active and ready for the dispatch
+
+
+3.2 DISPATCH A SIMPLE TEST TASK
+----------------------------------
+
+  In the BAND room (paste directly into the chat input in BAND Desktop),
+  paste this SIMPLE task:
+
+  """
+  Build a simple calculator JSON API with these endpoints:
+  - POST /add        → { "a": 5, "b": 3 } → { "result": 8 }
+  - POST /subtract   → { "a": 5, "b": 3 } → { "result": 2 }
+  - POST /multiply   → { "a": 5, "b": 3 } → { "result": 15 }
+  - POST /divide     → { "a": 6, "b": 3 } → { "result": 2 }
+  - Division by zero should return a 400 error
+
+  Use Python + FastAPI. Include unit tests.
+  """
+
+  WHY THIS TASK: It's simple enough that you can verify correctness
+  yourself, but complex enough to test the full agent pipeline.
+
+
+3.3 OBSERVE THE PIPELINE
+---------------------------
+
+  Watch the agents work in Band Desktop:
+
+  Expected flow:
+  1. ARCHITECT reads the task
+     → Posts a design document
+     → Posts work items
+     → Tags the Coder
+
+  2. CODER reads the design
+     → Implements the calculator API
+     → Writes unit tests
+     → Runs tests
+     → Posts HANDOFF.md
+     → Tags the Ghost Auditor
+
+  3. GHOST AUDITOR reads the design (NOT the Coder's tests)
+     → Writes adversarial tests:
+       - Division by zero attack
+       - Very large number attack
+       - String instead of number attack
+       - Negative number edge cases
+     → Runs attacks against the code
+     → Posts AUDIT_REPORT.md
+
+  4. GATEKEEPER reads both reports
+     → If both pass: ACCEPT
+     → If any fail: REJECT and send back to Coder
+
+  THINGS TO WATCH FOR:
+  - Do agents actually tag each other? (handoffs working?)
+  - Does the Ghost Auditor read the spec, not the code tests?
+  - Does the Gatekeeper wait for BOTH reports?
+  - If rejected, does the Coder actually fix and re-submit?
+
+
+3.4 FIX MANDATE ISSUES
+-------------------------
+
+  After the dry run, you'll probably find issues. Common ones:
+
+  PROBLEM: Agents don't tag each other properly
+  FIX: Add explicit tagging instructions to mandates
+       "When your work is complete, @mention the [next role] agent"
+
+  PROBLEM: Ghost Auditor reads the Coder's test files
+  FIX: Add to Ghost Auditor mandate:
+       "You must ONLY read the design document and the source code.
+        Do NOT read any files in the tests/ directory."
+
+  PROBLEM: Gatekeeper accepts without waiting for Auditor
+  FIX: Add to Gatekeeper mandate:
+       "Do NOT make any decision until you have received reports
+        from BOTH the implementation agent AND the adversarial agent."
+
+  PROBLEM: Agents go off-script or ignore their mandate
+  FIX: Make mandates shorter and more direct. LLMs follow
+       shorter, clearer instructions better than long ones.
+
+  PROBLEM: The feedback loop doesn't work (no re-submission)
+  FIX: Add to Coder mandate:
+       "If your work is rejected, read the rejection feedback,
+        make the required fixes, and re-submit for review."
+
+  Update your mandate files with any fixes, then commit:
+    git add mandates/
+    git commit -m "fix: refined mandates after dry run"
+    git push
+
+
+3.5 CLEAN UP AFTER DRY RUN
+------------------------------
+
+  - Delete any calculator code the agents created
+  - Keep the improved mandate files
+  - Note down what worked and what didn't
+  - You're now ready for the real run!
+
+
+================================================================================
+  PHASE 4 — THE REAL RUN: POCKETFUL STAGE 1
+  "Lights out. The factory runs."
+  Estimated time: 2-4 hours (mostly watching)
+================================================================================
+
+4.1 PRE-FLIGHT CHECKLIST
+---------------------------
+
+  [ ] All 4 mandate files are refined (from dry run learnings)
+  [ ] BAND Desktop is running with all checks green
+  [ ] Docker Desktop is running
+  [ ] Screen recorder is ready (OBS or Game Bar)
+  [ ] GitHub repo is clean (no dry run artifacts)
+  [ ] You have 3-4 hours of uninterrupted time
+  [ ] GEMINI_API_KEY environment variable is set and verified (100% Free)
+
+
+4.2 START RECORDING
+----------------------
+
+  BEFORE dispatching the task:
+  1. Open Band Desktop
+  2. Start your screen recorder focused on Band Desktop
+  3. Also record any terminal windows showing the Python agents running
+  
+  THE VIDEO OF THE BAND DESKTOP ROOM IS MANDATORY.
+  No room recording = disqualified. Start recording NOW.
+
+
+4.3 LAUNCH THE 4 AGENTS
+--------------------------
+
+  Launch all 4 autonomous Python agents:
+    python agents/run_factory.py
+  (or run each script in a separate PowerShell tab).
+
+  Verify in Band Desktop: 4 agents, all Connected, same room.
+
+
+4.4 DISPATCH THE POCKETFUL STAGE 1 TASK
+------------------------------------------
+
+  Paste this into the BAND room (this is your ONLY human input):
+
+  """
+  Build a wallet and payments JSON API service.
+
+  REQUIREMENTS:
+  1. Wallets:
+     - Create wallets with unique IDs and optional names
+     - Get wallet details including current balance
+     - List all wallets
+
+  2. Transfers:
+     - Transfer money between two wallets
+     - Each transfer must have a unique idempotency key
+     - Sending the same idempotency key must return the same result
+       (no duplicate transfers on retry)
+     - A transfer must be atomic: both the debit and credit happen
+       together, or neither happens
+     - A wallet's balance must never go below zero
+     - Transfer amounts must be positive and use exact decimal
+       arithmetic (never floating point)
+
+  3. Double-Entry Bookkeeping:
+     - Every transfer creates exactly 2 journal entries:
+       one DEBIT (negative) on the source wallet,
+       one CREDIT (positive) on the destination wallet
+     - INVARIANT: The sum of ALL journal entries across ALL wallets
+       must ALWAYS equal zero
+     - Wallet balance = sum of all journal entries for that wallet
+
+  4. State Management (for test harness):
+     - POST /state/import — load a complete state snapshot
+     - GET  /state/export — dump complete state
+     - POST /state/reset  — reset to clean state
+
+  5. Health:
+     - GET /health — returns 200 with status info
+
+  TECH STACK:
+  - Python 3.11 with FastAPI
+  - SQLite with SQLAlchemy (async)
+  - Pydantic v2 for validation
+  - All monetary amounts as decimal.Decimal, stored as TEXT
+  - pytest + httpx for testing
+  - Docker container (python:3.11-slim base, no outbound network)
+
+  CODE LOCATION: stage-1/ directory
+
+  CRITICAL INVARIANTS TO VERIFY:
+  - sum(all journal entries) == 0  ALWAYS
+  - wallet balance == sum(journal entries for that wallet)  ALWAYS
+  - same idempotency key → same response  ALWAYS
+  - balance never negative  ALWAYS
+  - no partial transfers (both entries or neither)  ALWAYS
+  """
+
+
+4.5 WATCH AND DON'T TOUCH
+----------------------------
+
+  This is the hardest part for a solo dev: DON'T INTERVENE.
+
+  The judging criteria explicitly says:
+  "the task you dispatch for each stage is the only human input —
+   no steering, approvals or reruns"
+
+  What to do while agents work:
+  - Watch the BAND Desktop room for progress
+  - Take notes on what's happening (for your video walkthrough)
+  - Check if agents are following the handoff pattern
+  - Note any interesting decisions agents make
+  - Prepare your FACTORY.md documentation
+
+  RED FLAGS to watch for (but still don't intervene):
+  - An agent gets stuck in a loop
+  - An agent doesn't respond for > 10 minutes
+  - Agents talking past each other
+
+  IF AGENTS COMPLETELY STALL (> 20 min no activity):
+  - Check if Python agent processes are still active in terminal
+  - Check BAND Desktop agent connection status
+  - If a process stopped or hit an uncaught exception: restart it
+  - Do NOT give them hints about the code
+
+
+4.6 POST-RUN VERIFICATION
+----------------------------
+
+  After the agents complete their work (Gatekeeper posts RELEASE.md):
+
+  Step 1: Check the code exists
+    ls stage-1/app/
+    ls stage-1/tests/
+
+  Step 2: Build the Docker container
+    cd stage-1
+    docker build -t ghostprocess-pocketful .
+
+  Step 3: Run the container
+    docker run -p 8000:8000 --network none ghostprocess-pocketful
+    (--network none simulates no outbound network)
+
+  Step 4: Test basic functionality
+    # In another terminal:
+    # Create a wallet
+    curl -X POST http://localhost:8000/wallets -H "Content-Type: application/json" -d "{\"name\": \"Alice\"}"
+
+    # Create another wallet
+    curl -X POST http://localhost:8000/wallets -H "Content-Type: application/json" -d "{\"name\": \"Bob\"}"
+
+    # Transfer money (use wallet IDs from responses above)
+    curl -X POST http://localhost:8000/transfers -H "Content-Type: application/json" -d "{\"source_wallet_id\": \"ALICE_ID\", \"destination_wallet_id\": \"BOB_ID\", \"amount\": \"50.00\", \"idempotency_key\": \"test-1\"}"
+
+    # Check health
+    curl http://localhost:8000/health
+
+  Step 5: Run the test suite
+    cd stage-1
+    pip install -r requirements.txt
+    pytest tests/ -v
+
+  Step 6: If tests fail or container doesn't build
+    THIS IS NOT A DISASTER. You can manually fix issues.
+    The agents did the heavy lifting; you're fixing build issues.
+    This still counts — the factory produced the work, you're
+    doing operational maintenance.
+
+
+================================================================================
+  PHASE 5 — STAGE 2: THE FRONTEND (STRETCH GOAL)
+  "Give it a face — and make it look GOOD"
+  Estimated time: 2-3 hours
+================================================================================
+
+  Only attempt Stage 2 if Stage 1 is SOLID and working.
+
+5.1 FRONTEND SETUP
+---------------------
+
+  You can either:
+  A) Have the agents build it (dispatch another task to the BAND room)
+  B) Build it yourself alongside the factory (faster, more control)
+
+  Recommended: Option B for the frontend — you have more design control,
+  and the factory already proved itself with Stage 1.
+
+  Tech choice for frontend:
+    - Vite + vanilla JS (lightest, fastest to set up)
+    - OR React + Vite (if you want component structure)
+
+  Setup (Vite + vanilla JS):
+    cd stage-2
+    npx -y create-vite@latest ./ --template vanilla
+    npm install
+
+
+5.2 DESIGN SYSTEM — BLACK + RED THEME
+----------------------------------------
+
+  Your theme: Primary Black (#0a0a0a) + Secondary Red (#dc2626)
+
+  ╔════════════════════════════════════════════════════════════════╗
+  ║  TIPS TO MAKE IT NOT LOOK "VIBECODED" (AI-GENERATED)         ║
+  ║                                                               ║
+  ║  The #1 giveaway of a vibecoded UI is that it looks like a   ║
+  ║  generic Bootstrap/Tailwind template. Here's how to avoid it: ║
+  ╠════════════════════════════════════════════════════════════════╣
+  ║                                                               ║
+  ║  1. TYPOGRAPHY IS KING                                        ║
+  ║     - Use "Inter" or "Space Grotesk" from Google Fonts       ║
+  ║     - DON'T use the default system font                      ║
+  ║     - Use font-weight variation: 300 for body, 600 for heads ║
+  ║     - Use letter-spacing: -0.02em on headings (tighter)      ║
+  ║     - Use line-height: 1.6 on body text (more breathing room)║
+  ║                                                               ║
+  ║  2. COLOR PALETTE (not just "black and red")                  ║
+  ║     - Background:     #0a0a0a (not #000000 — pure black      ║
+  ║                        looks cheap on screens)                ║
+  ║     - Surface:        #141414 (card backgrounds)              ║
+  ║     - Surface hover:  #1a1a1a                                 ║
+  ║     - Border:         #262626 (subtle, not harsh)             ║
+  ║     - Text primary:   #fafafa (not pure #ffffff)              ║
+  ║     - Text secondary: #a1a1a1                                 ║
+  ║     - Text muted:     #6b6b6b                                 ║
+  ║     - Accent:         #dc2626 (your red)                      ║
+  ║     - Accent hover:   #b91c1c (darker red on hover)          ║
+  ║     - Accent glow:    rgba(220, 38, 38, 0.15) (for shadows)  ║
+  ║     - Success:        #16a34a (green for positive balances)   ║
+  ║     - Warning:        #d97706 (amber for pending)             ║
+  ║     - Error:          #dc2626 (same red for errors)           ║
+  ║                                                               ║
+  ║  3. SPACING SYSTEM (consistency = professional)               ║
+  ║     - Use multiples of 4px: 4, 8, 12, 16, 24, 32, 48, 64   ║
+  ║     - Card padding: 24px                                      ║
+  ║     - Section gap: 32px                                       ║
+  ║     - Page margin: 48px                                       ║
+  ║                                                               ║
+  ║  4. BORDER-RADIUS (pick ONE and stick with it)                ║
+  ║     - Buttons: 8px                                            ║
+  ║     - Cards: 12px                                             ║
+  ║     - Inputs: 8px                                             ║
+  ║     - Modals: 16px                                            ║
+  ║     - DON'T mix rounded-full with rounded-sm randomly        ║
+  ║                                                               ║
+  ║  5. SHADOWS & DEPTH (dark mode specific!)                     ║
+  ║     - DON'T use black shadows on dark backgrounds — they're  ║
+  ║       invisible and look flat                                 ║
+  ║     - DO use a subtle colored glow instead:                   ║
+  ║       box-shadow: 0 0 30px rgba(220, 38, 38, 0.08);         ║
+  ║     - Use border: 1px solid #262626 for card edges            ║
+  ║     - On hover, brighten the border:                          ║
+  ║       border-color: #dc2626; transition: all 0.2s;           ║
+  ║                                                               ║
+  ║  6. MICRO-ANIMATIONS (the "alive" factor)                     ║
+  ║     - Button hover: scale(1.02) + background darken          ║
+  ║     - Card hover: border-color change + subtle translateY    ║
+  ║     - Page load: fade-in with translateY(10px → 0)           ║
+  ║     - Numbers changing: use CSS counter animation or JS      ║
+  ║     - Loading states: skeleton shimmer, not spinners         ║
+  ║     - Transitions: 0.2s ease for interactions                 ║
+  ║                    0.5s ease-out for page transitions         ║
+  ║                                                               ║
+  ║  7. LAYOUT TRICKS                                             ║
+  ║     - Use max-width: 1200px + margin: 0 auto for content    ║
+  ║     - Sidebar: fixed 280px wide, dark surface color          ║
+  ║     - Cards: use CSS Grid, not flexbox for wallet grid       ║
+  ║     - Table rows: alternating bg #141414 / #0f0f0f           ║
+  ║                                                               ║
+  ║  8. THINGS THAT SCREAM "VIBECODED" — AVOID THESE:           ║
+  ║     ✗ Centered everything with no visual hierarchy           ║
+  ║     ✗ All text the same size and weight                      ║
+  ║     ✗ Gradients on buttons (especially blue→purple)          ║
+  ║     ✗ Too many colors (stick to your palette!)               ║
+  ║     ✗ Giant hero sections with no content                    ║
+  ║     ✗ Stock icons used without purpose                       ║
+  ║     ✗ Perfect symmetry everywhere (real designs breathe)     ║
+  ║     ✗ Default HTML form elements (style your inputs!)        ║
+  ║     ✗ No empty states (what does an empty wallet look like?) ║
+  ║                                                               ║
+  ║  9. THINGS THAT LOOK PREMIUM:                                ║
+  ║     ✓ Monospace font for numbers/amounts (JetBrains Mono)   ║
+  ║     ✓ Subtle grain texture overlay on backgrounds            ║
+  ║     ✓ Red accent used SPARINGLY — only CTAs and highlights  ║
+  ║     ✓ A consistent icon set (Lucide or Phosphor icons)      ║
+  ║     ✓ Real data in demos, not "Lorem ipsum"                  ║
+  ║     ✓ Responsive — test at 1440px, 1024px, 768px, 375px    ║
+  ║     ✓ Dark scrollbar (style ::-webkit-scrollbar)             ║
+  ║     ✓ Custom 404 and error pages                             ║
+  ║     ✓ Favicon (a red "G" or "GP" on black background)       ║
+  ║                                                               ║
+  ║ 10. THE "ONE TRICK" THAT ELEVATES EVERYTHING:               ║
+  ║     Use a subtle noise/grain texture overlay on your bg:     ║
+  ║                                                               ║
+  ║     body::before {                                            ║
+  ║       content: "";                                            ║
+  ║       position: fixed;                                        ║
+  ║       inset: 0;                                               ║
+  ║       z-index: 9999;                                          ║
+  ║       pointer-events: none;                                   ║
+  ║       opacity: 0.03;                                          ║
+  ║       background-image: url("data:image/svg+xml,...");       ║
+  ║       /* Use a noise texture SVG data URI */                  ║
+  ║     }                                                         ║
+  ║                                                               ║
+  ║     This adds a subtle analog feel that immediately makes    ║
+  ║     the UI look more "designed" and less "generated".        ║
+  ╚════════════════════════════════════════════════════════════════╝
+
+
+5.3 FRONTEND PAGES TO BUILD
+------------------------------
+
+  Page 1: DASHBOARD (/)
+    - Total balance across all wallets (big number, monospace font)
+    - Recent transactions list (last 10)
+    - Wallet count, transfer count stats
+    - "New Wallet" and "New Transfer" buttons (red accent)
+
+  Page 2: WALLETS (/wallets)
+    - Grid of wallet cards
+    - Each card shows: name, ID, balance, last transaction date
+    - Click a card → wallet detail view
+    - "Create Wallet" button
+
+  Page 3: WALLET DETAIL (/wallets/:id)
+    - Wallet name, ID, full balance
+    - Transaction history for this wallet
+    - Journal entries list
+    - "Send Money" button
+
+  Page 4: TRANSFER (/transfer)
+    - Form: From wallet (dropdown), To wallet (dropdown), Amount
+    - Idempotency key auto-generated (show it, let user copy)
+    - Real-time balance check before submit
+    - Success/error state
+
+  Page 5: AUDIT LOG (/audit)
+    - Full journal entries table
+    - Running sum showing invariant (total should be 0)
+    - Visual indicator: green checkmark if sum == 0, red alert if not
+
+
+5.4 CSS STARTER (base styles for your theme)
+-------------------------------------------------
+
+  File: stage-2/src/style.css
+  ────────────────────────────
+
+  /* === Google Fonts Import === */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  /* === CSS Custom Properties (Design Tokens) === */
+  :root {
+    /* Colors */
+    --bg-primary: #0a0a0a;
+    --bg-surface: #141414;
+    --bg-surface-hover: #1a1a1a;
+    --bg-elevated: #1e1e1e;
+    --border: #262626;
+    --border-hover: #363636;
+
+    --text-primary: #fafafa;
+    --text-secondary: #a1a1a1;
+    --text-muted: #6b6b6b;
+
+    --accent: #dc2626;
+    --accent-hover: #b91c1c;
+    --accent-glow: rgba(220, 38, 38, 0.15);
+    --accent-subtle: rgba(220, 38, 38, 0.08);
+
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: #dc2626;
+
+    /* Typography */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 200ms ease;
+    --transition-slow: 500ms ease-out;
+  }
+
+  /* === Reset & Base === */
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Dark scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #404040; }
+
+  /* === Typography === */
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+  }
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  /* Monospace for amounts */
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* === Buttons === */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all var(--transition-normal);
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border-color: var(--border);
+  }
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    background: var(--accent-subtle);
+  }
+
+  /* === Cards === */
+  .card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    transition: all var(--transition-normal);
+  }
+  .card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+  .card-accent:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 30px var(--accent-glow);
+  }
+
+  /* === Inputs === */
+  input, select {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    transition: border-color var(--transition-normal);
+    width: 100%;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  /* === Table === */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th {
+    text-align: left;
+    padding: var(--space-3) var(--space-4);
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+  }
+  tr:hover td {
+    background: var(--bg-surface-hover);
+  }
+  ────────────────────────────
+
+
+5.5 FRONTEND → BACKEND CONNECTION
+------------------------------------
+
+  The frontend talks to the FastAPI backend via fetch():
+
+    const API = 'http://localhost:8000';
+
+    // Get all wallets
+    const wallets = await fetch(`${API}/wallets`).then(r => r.json());
+
+    // Create a wallet
+    const newWallet = await fetch(`${API}/wallets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Alice' })
+    }).then(r => r.json());
+
+    // Make a transfer
+    const transfer = await fetch(`${API}/transfers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source_wallet_id: 'xxx',
+        destination_wallet_id: 'yyy',
+        amount: '50.00',
+        idempotency_key: crypto.randomUUID()
+      })
+    }).then(r => r.json());
+
+  CORS: FastAPI needs to allow cross-origin requests.
+  Add to stage-1/app/main.py (or stage-2/app/main.py):
+
+    from fastapi.middleware.cors import CORSMiddleware
+    app.add_middleware(
+      CORSMiddleware,
+      allow_origins=["*"],
+      allow_methods=["*"],
+      allow_headers=["*"],
+    )
+
+
+================================================================================
+  PHASE 6 — DOCUMENTATION & FACTORY.MD
+  "The factory description is 50% of your score"
+  Estimated time: 1 hour
+================================================================================
+
+6.1 WRITE FACTORY.md
+-----------------------
+
+  This is the MOST IMPORTANT document for judging.
+  It must cover:
+
+  A) FACTORY OVERVIEW
+     - What is GhostProcess?
+     - The adversarial/courtroom philosophy
+     - Why this design is better than standard pipelines
+
+  B) SEAT DESCRIPTIONS
+     - Each seat: name, role, mandate summary
+     - How seats hand off work to each other
+     - What each seat produces and consumes
+
+  C) DESIGN RATIONALE
+     - Why 4 seats? Why not 3 or 5?
+     - Why adversarial testing?
+     - Why the Ghost Auditor is blind to the Coder's tests
+     - Why the Gatekeeper requires BOTH reports
+
+  D) MEASURED COSTS
+     - How long did the run take?
+     - How many tokens were consumed per agent?
+     - What was the total API cost?
+     - (Estimate if you don't have exact numbers)
+
+  E) ERROR RECOVERY
+     - What happens when the Coder's code fails tests?
+     - What happens when the Ghost Auditor finds a breach?
+     - What happens when an agent crashes mid-task?
+     - How does the factory recover from bad work?
+
+  F) REPRODUCTION INSTRUCTIONS
+     - How to set up BAND Desktop
+     - How to create the 4 seats
+     - How to dispatch a task
+     - How to run the resulting code
+
+
+6.2 WRITE README.md
+-----------------------
+
+  Quick project overview:
+  - What is GhostProcess
+  - What it built (Pocketful Stage 1)
+  - How to run it (docker build + docker run)
+  - Link to the video
+  - Link to FACTORY.md for details
+
+
+================================================================================
+  PHASE 7 — VIDEO PRODUCTION
+  "Show, don't tell"
+  Estimated time: 1-2 hours
+================================================================================
+
+7.1 VIDEO STRUCTURE (aim for 3-5 minutes)
+--------------------------------------------
+
+  [0:00 - 0:30] INTRO
+    - "Hi, I'm Dhruv. This is GhostProcess."
+    - Quick concept: "An adversarial dark factory where one agent
+      tries to break what another agent builds."
+
+  [0:30 - 1:30] BAND DESKTOP ROOM RECORDING
+    - Show the actual BAND Desktop room from your run
+    - Point out: agents communicating, handoffs happening
+    - Highlight: the Ghost Auditor's attack report
+    - Highlight: the Gatekeeper's accept/reject decision
+    - THIS SECTION IS MANDATORY — NO ROOM = DISQUALIFIED
+
+  [1:30 - 2:30] FACTORY ARCHITECTURE
+    - Show the 4 seats and their mandates
+    - Explain the courtroom metaphor briefly
+    - Show the handoff flow diagram
+    - Emphasize: mandates are generic, reusable
+
+  [2:30 - 3:30] THE RESULT — WORKING APP
+    - Show the API running (curl commands or Swagger UI)
+    - Create a wallet, make a transfer
+    - Show the double-entry ledger in action
+    - Show the audit log (sum = 0 invariant)
+    - If Stage 2: show the frontend UI
+
+  [3:30 - 4:00] KEY INSIGHTS
+    - What worked well
+    - What would you improve
+    - What you learned about multi-agent collaboration
+
+  [4:00 - 4:30] CLOSE
+    - Thank the organizers
+    - Link to GitHub repo
+
+7.2 VIDEO TIPS
+----------------
+
+  - Record at 1080p minimum
+  - Use a dark VS Code theme in your demo (matches your branding)
+  - If you have a mic, narrate. If not, add text overlays.
+  - Edit with: CapCut (free), DaVinci Resolve (free, pro), or
+    even Windows Video Editor (basic but works)
+  - Upload to YouTube (unlisted is fine) or Loom
+
+
+================================================================================
+  PHASE 8 — SUBMISSION
+  "Cross the finish line"
+  Estimated time: 30 minutes
+================================================================================
+
+8.1 FINAL REPO CHECKLIST
+---------------------------
+
+  Your GitHub repo should contain:
+
+  [ ] README.md
+  [ ] FACTORY.md (detailed factory description)
+  [ ] mandates/
+      [ ] architect.md
+      [ ] coder.md
+      [ ] ghost-auditor.md
+      [ ] gatekeeper.md
+  [ ] room-export/
+      [ ] (exported BAND room data)
+  [ ] stage-1/
+      [ ] Dockerfile
+      [ ] requirements.txt
+      [ ] app/ (complete FastAPI application)
+      [ ] tests/ (test suite)
+      [ ] adversarial_tests/ (Ghost Auditor's attack suite)
+  [ ] DESIGN.md (Architect's output)
+  [ ] AUDIT_REPORT.md (Ghost Auditor's report)
+  [ ] RELEASE.md (Gatekeeper's acceptance)
+
+  VERIFY: `docker build` and `docker run` work from a clean clone.
+
+    git clone https://github.com/YOUR_USERNAME/ghostprocess-pocketful.git
+    cd ghostprocess-pocketful/stage-1
+    docker build -t test .
+    docker run -p 8000:8000 --network none test
+    curl http://localhost:8000/health
+
+
+8.2 EXPORT THE BAND ROOM
+---------------------------
+
+  In Band Desktop:
+  - Find your run room
+  - Look for an export option (may be in room settings)
+  - Save the export to room-export/ in your repo
+  - If no direct export: screenshots of the full conversation
+    work as backup evidence
+
+
+8.3 SUBMIT ON LABLAB.AI
+--------------------------
+
+  Go to the hackathon page on lablab.ai
+  Click "Submit Project"
+
+  Fill in:
+  [ ] Project title: "GhostProcess: Adversarial Dark Factory"
+  [ ] Short description: "A 4-seat AI dark factory where a Ghost Auditor
+      agent actively tries to break code produced by a Coder agent.
+      Only code that survives adversarial attack ships."
+  [ ] Long description: (expand on the concept, methodology, results)
+  [ ] Technology tags: Band, BAND Python SDK, Google Gemini, Groq,
+      Python, FastAPI, Docker, SQLite
+  [ ] Category: Dark Factory / AI Agents
+  [ ] Cover image: (create one — black bg, red text "GHOSTPROCESS",
+      maybe a ghost emoji or simple icon)
+  [ ] Video: YouTube/Loom link
+  [ ] GitHub: your repo link
+  [ ] Slide presentation: optional (make one if you have time)
+
+  DEADLINE: October 6, 12:29 PM IST
+  Submit at LEAST 2 hours early in case of technical issues.
+
+
+8.4 FINAL GIT PUSH
+---------------------
+
+  cd "F:\Dhruv's\Hackathon\DarkFactory-GhostProcess\ghostprocess-pocketful"
+  git add -A
+  git commit -m "submission: GhostProcess v1.0"
+  git push origin main
+
+
+================================================================================
+  PHASE SUMMARY — QUICK REFERENCE
+================================================================================
+
+  Phase 0: Accounts & Downloads           ~30-45 min
+  Phase 1: BAND Desktop + Python SDK      ~30-45 min
+  Phase 2: Project Scaffolding            ~20-30 min
+  Phase 3: Dry Run (test with simple task) ~45-90 min
+  Phase 4: Real Run (Pocketful Stage 1)    ~2-4 hours (mostly watching)
+  Phase 5: Frontend (Stage 2, stretch)     ~2-3 hours
+  Phase 6: Documentation                   ~1 hour
+  Phase 7: Video Production                ~1-2 hours
+  Phase 8: Submission                      ~30 min
+  ─────────────────────────────────────────────────────
+  TOTAL:                                   ~9-14 hours
+
+  WITH YOUR TIME CONSTRAINT (2 days, exam in between):
+  
+  Day 1 (today): Phases 0-3 (~2-3 hours)
+    Get everything installed, do the dry run
+    This is the foundation — don't skip the dry run!
+
+  Day 2 (tomorrow): Phases 4-8 (~5-7 hours)
+    The real run, documentation, video, submit
+    If time: attempt Phase 5 (frontend)
+
+  MINIMUM VIABLE SUBMISSION: Phases 0-4 + 6 + 7 + 8
+    (skip the frontend, focus on factory + Stage 1 + docs + video)
+
+
+================================================================================
+  EMERGENCY PLAN — IF EVERYTHING GOES WRONG
+================================================================================
+
+  IF BAND DESKTOP WON'T WORK:
+    - Ask on BAND Discord immediately
+    - Try reinstalling
+    - Try on a different machine (borrow a friend's laptop?)
+    - As last resort: use the BAND SDK directly (Python) to create
+      agents programmatically (more complex but bypasses Desktop)
+      See: https://docs.band.ai/integrations/sdks/overview.md
+
+  IF GEMINI FREE TIER RATE LIMITS YOU (15 RPM):
+    - Ensure request pacing is enabled in `agents/gemini_client.py` (sleep 3-4s between requests)
+    - Switch Seat 3 (Ghost Auditor) or Seat 1 (Architect) to Groq Cloud free tier (Llama 3.3 70B)
+    - Run a local model via Ollama (e.g., `ollama run qwen2.5-coder:7b`) with zero rate limits
+    - All options are 100% free with zero dollars spent!
+
+  IF AGENTS PRODUCE BAD CODE:
+    - Fix the critical bugs yourself (it's OK)
+    - The factory produced the initial work — you're maintaining it
+    - Focus on making the FACTORY impressive, not the code perfect
+
+  IF YOU RUN OUT OF TIME:
+    - Submit what you have. Stage 1 alone is eligible.
+    - A well-documented Stage 1 beats a broken Stage 2
+    - The factory design (50% of score) is in your mandates and
+      FACTORY.md — those don't need working code
+
+  REMEMBER: You came here to LEARN, not to win. 
+  Every phase you complete is knowledge you didn't have before.
+
+================================================================================
+                   NOW GO BUILD IT. ONE PHASE AT A TIME. 🚀
+================================================================================

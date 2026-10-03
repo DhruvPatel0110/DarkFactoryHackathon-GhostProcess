@@ -1,0 +1,920 @@
+================================================================================
+     GHOSTPROCESS — THE ADVERSARIAL DARK FACTORY
+     WeAreDevelopers x BAND Hackathon | Pocketful Track
+     Solo Builder: Dhruv | Oct 3, 2026
+================================================================================
+
+================================================================================
+  1. THE CONCEPT — WHAT IS GHOSTPROCESS?
+================================================================================
+
+GhostProcess is a 4-seat AI dark factory that treats software development
+like a courtroom trial:
+
+  - The ARCHITECT plans the case (decomposes the task)
+  - The CODER builds the defense (implements the code)
+  - The GHOST AUDITOR prosecutes (tries to BREAK the code with adversarial tests)
+  - The GATEKEEPER judges (accepts only what survives adversarial attack)
+
+The key insight: most factories have agents that check if code WORKS.
+GhostProcess has an agent whose entire job is to prove the code FAILS.
+Only code that survives active attack ships.
+
+This is a RED TEAM approach to software factories.
+
+Why "Ghost"? The auditor operates in the dark — it never sees the Coder's
+tests. It derives its attacks purely from the spec. If the Coder's code
+can survive attacks from an agent that has zero knowledge of the
+implementation, that code is genuinely robust.
+
+================================================================================
+  2. TRACK CHOICE — POCKETFUL (PAYMENTS/WALLET)
+================================================================================
+
+Track: Pocketful (Venmo-like wallet & payments app)
+
+WHY THIS TRACK:
+- The core invariant is simple and absolute: "money must never be created,
+  destroyed, or spent twice"
+- This is PERFECT for adversarial testing — double-spend, race conditions,
+  rounding errors are all attack vectors
+- Double-entry bookkeeping is a well-known pattern that LLM agents can
+  implement confidently
+- Judges from PayPal, Meta, Amazon — they know payments systems
+
+THE HARD PARTS (from the spec):
+- Money must never be created, destroyed, or spent twice
+- Must handle concurrent transfers correctly
+- Must handle retries without duplicating transactions
+- Must handle rounding correctly (no penny creation/destruction)
+
+================================================================================
+  3. THE FOUR STAGES
+================================================================================
+
+STAGE 1 — JSON API (Minimum Viable, MUST complete)
+  - Wallet CRUD (create, read, update)
+  - Transfer money between wallets
+  - Idempotent writes (retry-safe with request IDs)
+  - Atomic operations (no partial transfers)
+  - State import/export (for harness testing)
+  - All via JSON REST API
+
+STAGE 2 — Browser UI + Recovery (Stretch Goal)
+  - Responsive web UI on top of Stage 1 API
+  - Handle stale state / lost responses gracefully
+  - Playwright-testable interface
+  - All Stage 1 tests must still pass
+
+STAGE 3 — Temporal State (Hard Stretch)
+  - Bitemporal ledger (as-of and as-at queries)
+  - Transaction history with time-travel
+  - Concurrent writes with temporal ordering
+  - All previous stage tests must still pass
+
+STAGE 4 — Bulk Operations (Very Hard Stretch)
+  - Atomic bulk record changes
+  - Must not break history or temporal queries
+  - All previous stage tests must still pass
+
+REALISTIC TARGET: Stage 1 complete + Stage 2 started
+STRETCH TARGET: Stage 1 + Stage 2 complete
+
+================================================================================
+  4. TECHNICAL ARCHITECTURE
+================================================================================
+
+4.1 APPLICATION TECH STACK
+--------------------------
+
+  Backend:
+    Language:     Python 3.11+
+    Framework:    FastAPI (async, fast, built-in OpenAPI docs)
+    Database:     SQLite (simple, no external deps, runs in container)
+    ORM:          SQLAlchemy with async support
+    Migrations:   Alembic
+    Server:       Uvicorn (ASGI)
+
+  Why Python + FastAPI?
+    - LLM agents are BEST at writing Python — highest quality code generation
+    - FastAPI has automatic request validation via Pydantic
+    - SQLite = zero setup, works in sealed containers, no network needed
+    - Async support handles concurrent transfers naturally
+
+  Frontend (Stage 2):
+    Framework:    Vanilla HTML/CSS/JS or a simple React app
+    Styling:      Modern CSS with responsive design
+    Build:        Vite (if React) or just static files
+
+  Containerization:
+    Docker:       Dockerfile with multi-stage build
+    Base image:   python:3.11-slim
+    No outbound:  Container must work with no internet access
+
+
+4.2 KEY DESIGN PATTERNS
+------------------------
+
+  DOUBLE-ENTRY LEDGER:
+    Every transfer creates exactly 2 journal entries:
+      - DEBIT:  source wallet  -amount
+      - CREDIT: dest wallet    +amount
+    
+    Invariant: SUM(all journal entries) == 0 ALWAYS
+    This is the fundamental correctness guarantee.
+
+    Table: journal_entries
+    +----+----------------+----------------+--------+------------+----------+
+    | id | transaction_id | wallet_id      | amount | created_at | entry_type|
+    +----+----------------+----------------+--------+------------+----------+
+    | 1  | txn_abc123     | wallet_alice   | -50.00 | ...        | DEBIT    |
+    | 2  | txn_abc123     | wallet_bob     | +50.00 | ...        | CREDIT   |
+    +----+----------------+----------------+--------+------------+----------+
+
+    Wallet balance = SUM(journal_entries WHERE wallet_id = X)
+
+  IDEMPOTENCY:
+    Every write request includes an idempotency_key (client-generated UUID)
+    
+    Table: idempotency_keys
+    +------------------+--------+-----------+
+    | idempotency_key  | status | response  |
+    +------------------+--------+-----------+
+    | req_xyz789       | DONE   | {json...} |
+    +------------------+--------+-----------+
+
+    On duplicate key: return cached response, don't re-execute
+    This makes retries safe — same request = same result
+
+  ATOMIC TRANSFERS:
+    All balance changes wrapped in database transactions
+    Use SQLite's built-in transaction isolation
+    No partial transfers possible — either both entries write or neither does
+
+  STATE IMPORT/EXPORT:
+    POST /state/import — load a complete state snapshot (for test harness)
+    GET  /state/export — dump complete state (wallets + journal + balances)
+    Used by the grading harness to set up test scenarios
+
+
+4.3 API DESIGN (Stage 1)
+-------------------------
+
+  Wallets:
+    POST   /wallets                 Create a new wallet
+    GET    /wallets/{id}            Get wallet details + balance
+    GET    /wallets                 List all wallets
+
+  Transfers:
+    POST   /transfers               Transfer money between wallets
+      Body: {
+        "idempotency_key": "uuid",
+        "source_wallet_id": "string",
+        "destination_wallet_id": "string",
+        "amount": "string (decimal)"    <-- string to avoid floating point
+      }
+    GET    /transfers/{id}          Get transfer details
+    GET    /transfers               List transfers (with filters)
+
+  State (for harness):
+    POST   /state/import            Import full state snapshot
+    GET    /state/export            Export full state snapshot
+    POST   /state/reset             Reset to clean state
+
+  Health:
+    GET    /health                  Health check
+
+
+4.4 DATA MODEL
+--------------
+
+  wallets:
+    id              TEXT PRIMARY KEY (UUID)
+    name            TEXT
+    created_at      DATETIME
+    updated_at      DATETIME
+
+  journal_entries:
+    id              INTEGER PRIMARY KEY AUTOINCREMENT
+    transaction_id  TEXT NOT NULL (links debit + credit)
+    wallet_id       TEXT NOT NULL (FK -> wallets.id)
+    amount          TEXT NOT NULL (decimal as string, no float!)
+    entry_type      TEXT NOT NULL (DEBIT or CREDIT)
+    created_at      DATETIME NOT NULL
+
+  idempotency_keys:
+    key             TEXT PRIMARY KEY
+    status          TEXT NOT NULL (PENDING, DONE, FAILED)
+    response_body   TEXT (cached JSON response)
+    created_at      DATETIME NOT NULL
+
+  transfers:
+    id              TEXT PRIMARY KEY (UUID)
+    idempotency_key TEXT UNIQUE
+    source_wallet   TEXT NOT NULL (FK -> wallets.id)
+    dest_wallet     TEXT NOT NULL (FK -> wallets.id)
+    amount          TEXT NOT NULL
+    status          TEXT NOT NULL (PENDING, COMPLETED, FAILED)
+    created_at      DATETIME NOT NULL
+
+  CRITICAL: All monetary amounts stored as TEXT (decimal strings).
+  Use Python's `decimal.Decimal` for all arithmetic.
+  NEVER use float for money. Ever.
+
+================================================================================
+  5. FACTORY ARCHITECTURE — THE 4 SEATS
+================================================================================
+
+Each seat is an autonomous Python agent running via the BAND Python SDK
+(`band-sdk`) connected to BAND Desktop, powered by Google Gemini 2.5 Flash
+(100% FREE via Google AI Studio API — no credit card needed).
+Alternative free backends like Groq Cloud (Llama 3.3 70B) or local Ollama
+can be swapped in with zero cost ($0.00 spend).
+
+Each seat has a MANDATE — its standing instructions. Mandates MUST be generic
+(no mention of "Pocketful", wallets, transfers, etc.).
+
+5.1 SEAT 1: ARCHITECT — "The Blueprint"
+-----------------------------------------
+  Runtime:        BAND Python SDK + Google Gemini 2.5 Flash (100% FREE, Google AI Studio)
+  Role:           Receives the project task, decomposes into work items
+  
+  What it does:
+    1. Reads the task dispatched to the room
+    2. Produces a technical design document:
+       - System architecture overview
+       - Data model design
+       - API contract definitions
+       - Key invariants that MUST hold
+       - Non-functional requirements (concurrency, idempotency)
+    3. Breaks the design into ordered work items for the Coder
+    4. Hands off work items with clear acceptance criteria
+    5. Does NOT write any implementation code
+
+  Handoff Output:
+    - DESIGN.md (architecture document)
+    - WORK_ITEMS.md (ordered list with acceptance criteria)
+
+  MANDATE (Generic — suitable for ANY project):
+  """
+  You are the Architect. Your job is to receive a project specification and
+  produce a complete technical design that another agent can implement.
+
+  Your responsibilities:
+  1. Read the project specification thoroughly
+  2. Identify core invariants — properties that must ALWAYS hold
+  3. Design the data model with clear schemas
+  4. Define API contracts with request/response formats
+  5. List non-functional requirements (concurrency, idempotency, atomicity)
+  6. Break the work into ordered, implementable work items
+  7. Each work item must have clear acceptance criteria
+
+  You must NOT write implementation code. Your output is the blueprint.
+  
+  Output format:
+  - Post DESIGN.md with full architecture
+  - Post WORK_ITEMS.md with ordered tasks and acceptance criteria
+  - Tag the Coder when ready for implementation handoff
+
+  Quality bar:
+  - A competent developer should be able to implement from your design alone
+  - Every invariant must be explicitly stated
+  - Every edge case you can foresee must be documented
+  """
+
+
+5.2 SEAT 2: CODER — "The Builder"
+-----------------------------------
+  Runtime:        BAND Python SDK + Google Gemini 2.5 Flash (100% FREE, Google AI Studio)
+  Role:           Implements the design, writes code + unit tests
+
+  What it does:
+    1. Receives DESIGN.md and WORK_ITEMS.md from Architect
+    2. Implements each work item in order
+    3. Writes unit tests for each component
+    4. Ensures all tests pass before declaring "done"
+    5. Commits code to the project repository
+    6. Hands off to Ghost Auditor for adversarial review
+
+  Handoff Output:
+    - Working codebase in the project repo
+    - All unit tests passing
+    - A HANDOFF.md summarizing what was built and how to run it
+
+  MANDATE (Generic):
+  """
+  You are the Coder. You receive a technical design and ordered work items
+  from the Architect. Your job is to implement them faithfully.
+
+  Your responsibilities:
+  1. Read the design document and work items carefully
+  2. Implement each work item in order
+  3. Write unit tests for every component
+  4. Ensure all tests pass before declaring work complete
+  5. Follow the data model and API contracts exactly as specified
+  6. Use proper error handling — never swallow exceptions
+  7. All monetary/numeric values must use exact arithmetic (no floating point)
+
+  When implementation is complete:
+  - Run all tests and confirm they pass
+  - Write HANDOFF.md with: what was built, how to run it, how to test it
+  - Tag the Auditor for adversarial review
+
+  You must NOT modify the Architect's design without raising a concern
+  in the room first. If something seems wrong in the design, say so
+  before implementing it.
+
+  Code quality standards:
+  - Clean, readable code with docstrings
+  - No hardcoded values — use configuration
+  - Proper logging for debugging
+  - Containerization support (Dockerfile)
+  """
+
+
+5.3 SEAT 3: GHOST AUDITOR — "The Breaker" ★ KEY DIFFERENTIATOR ★
+------------------------------------------------------------------
+  Runtime:        BAND Python SDK + Google Gemini 2.5 Flash / Groq Llama 3.3 70B (100% FREE)
+  Role:           Adversarial testing — tries to BREAK the code
+
+  What it does:
+    1. Reads ONLY the Architect's design document (NOT the Coder's tests)
+    2. Derives attack vectors from the spec and invariants
+    3. Writes adversarial test scenarios that try to:
+       - Violate invariants (e.g., create money from nothing)
+       - Exploit race conditions (concurrent conflicting operations)
+       - Break idempotency (duplicate requests producing different results)
+       - Trigger rounding errors (penny creation/destruction)
+       - Crash the system (malformed input, boundary values)
+       - Exploit state inconsistencies (partial failures)
+    4. Runs each attack against the Coder's implementation
+    5. Reports results: SURVIVED or BREACHED for each attack
+    6. If any attack succeeds (code breaks): sends BREACH REPORT to room
+    7. If all attacks fail (code holds): sends CLEARANCE REPORT to room
+
+  Handoff Output:
+    - AUDIT_REPORT.md with:
+      - List of every attack attempted
+      - Attack methodology
+      - Result (SURVIVED / BREACHED)
+      - Reproduction steps for any breach
+    - adversarial_tests/ directory with all test scripts
+
+  MANDATE (Generic — this is the crown jewel):
+  """
+  You are the Ghost Auditor. You are an adversarial testing agent. Your
+  sole purpose is to find bugs, vulnerabilities, and invariant violations
+  in code written by another agent.
+
+  CRITICAL RULES:
+  1. You must NEVER read the other agent's test suite. You derive your
+     tests independently from the design specification.
+  2. You are not here to confirm the code works. You are here to prove
+     it DOESN'T. Approach every system as if it has hidden bugs.
+  3. You must try to break every invariant listed in the design.
+
+  Attack categories you must attempt:
+  A. INVARIANT VIOLATION: Can you make a property that "must always hold"
+     become false? Try boundary values, negative numbers, zero, maximum
+     values, and forbidden states.
+  B. CONCURRENCY ATTACK: Can you cause a race condition? Send simultaneous
+     conflicting requests. Try double-spending, double-booking, or
+     simultaneous reads and writes.
+  C. IDEMPOTENCY VIOLATION: Does sending the same request twice produce
+     different results? Try rapid retries, delayed retries, and retries
+     after partial failure.
+  D. PRECISION ATTACK: Can you create or destroy fractional units through
+     rounding? Try splitting and recombining values, very small amounts,
+     and very large amounts.
+  E. STATE CORRUPTION: Can you leave the system in an inconsistent state?
+     Try operations that fail halfway, import invalid state, and query
+     during writes.
+  F. INPUT FUZZING: Does the system handle malformed, missing, or extreme
+     input gracefully? Try empty strings, null values, negative numbers,
+     strings where numbers are expected, and very long inputs.
+
+  Output format:
+  - Write each attack as a runnable test script
+  - Save all attacks to an adversarial_tests/ directory
+  - Create AUDIT_REPORT.md with:
+    * Attack ID, category, description
+    * Expected behavior vs actual behavior
+    * Verdict: SURVIVED or BREACHED
+    * Reproduction steps for any BREACHED attack
+  - Post the verdict to the room:
+    * If ANY attack breaches: "BREACH — [count] vulnerabilities found"
+    * If ALL attacks survived: "CLEARANCE — all attacks survived"
+  """
+
+
+5.4 SEAT 4: GATEKEEPER — "The Judge"
+--------------------------------------
+  Runtime:        BAND Python SDK + Google Gemini 2.5 Flash (100% FREE, Google AI Studio)
+  Role:           Final quality gate — accepts or rejects the build
+
+  What it does:
+    1. Waits for both:
+       a) Coder's HANDOFF.md (confirming implementation is done)
+       b) Ghost Auditor's AUDIT_REPORT.md (adversarial test results)
+    2. Reviews both reports independently
+    3. Decision matrix:
+       - ALL Coder tests pass + ALL auditor attacks survived = ACCEPT
+       - ANY Coder test fails = REJECT (send back to Coder)
+       - ANY auditor attack breaches = REJECT (send breach details to Coder)
+    4. If REJECTED: posts specific failures and sends back to Coder
+    5. If ACCEPTED: posts final RELEASE.md and marks work as done
+    6. The Coder fixes and re-triggers Auditor review (loop until ACCEPT)
+
+  MANDATE (Generic):
+  """
+  You are the Gatekeeper. You are the final quality gate. No code ships
+  unless you accept it.
+
+  Your process:
+  1. Wait for TWO signals before making a decision:
+     a) The implementation agent's handoff report
+     b) The adversarial testing agent's audit report
+  2. Do NOT accept based on the implementer's word alone.
+     The adversarial report is required.
+
+  Decision rules:
+  - ACCEPT only if:
+    * The implementation agent reports all tests passing
+    * The adversarial agent reports all attacks survived
+    * You have independently verified both claims
+  - REJECT if:
+    * Any test failure is reported
+    * Any adversarial attack succeeded (breached)
+    * Evidence is missing or inconclusive
+
+  On REJECT:
+  - Post the specific failures to the room
+  - Tag the implementation agent with clear fix instructions
+  - Request a new adversarial review after fixes
+
+  On ACCEPT:
+  - Post RELEASE.md confirming the build is accepted
+  - Include: what was verified, evidence summary, known limitations
+  - Mark the work item as done
+
+  You must NEVER write or modify code. You only read, verify, and decide.
+  """
+
+================================================================================
+  6. HANDOFF FLOW — HOW THE FACTORY OPERATES
+================================================================================
+
+The flow is a directed graph with a feedback loop:
+
+  ┌──────────────────────────────────────────────────────────┐
+  │                    HUMAN DISPATCH                        │
+  │  (You paste the task into the BAND room — ONLY input)    │
+  └────────────────────────┬─────────────────────────────────┘
+                           │
+                           ▼
+  ┌──────────────────────────────────────────────────────────┐
+  │                 SEAT 1: ARCHITECT                        │
+  │  Reads task → Produces DESIGN.md + WORK_ITEMS.md         │
+  │  Tags Coder when ready                                   │
+  └────────────────────────┬─────────────────────────────────┘
+                           │
+                           ▼
+  ┌──────────────────────────────────────────────────────────┐
+  │                  SEAT 2: CODER                           │
+  │  Reads design → Implements → Writes tests → HANDOFF.md   │
+  │  Tags Ghost Auditor when ready                           │
+  └────────────────────────┬─────────────────────────────────┘
+                           │
+                ┌──────────┴──────────┐
+                │                     │
+                ▼                     ▼
+  ┌─────────────────────┐  ┌──────────────────────────────┐
+  │  SEAT 4: GATEKEEPER │  │  SEAT 3: GHOST AUDITOR       │
+  │  (waits for both)   │  │  Reads spec (NOT code tests) │
+  │                     │  │  Writes adversarial attacks   │
+  │                     │  │  Runs attacks against code    │
+  │                     │  │  Posts AUDIT_REPORT.md        │
+  └─────────┬───────────┘  └──────────┬───────────────────┘
+            │                         │
+            │    ◄────────────────────┘
+            │    (Gatekeeper receives both reports)
+            │
+            ▼
+     ┌──────────────┐        ┌──────────────────────────┐
+     │   ACCEPT?    │──NO──► │  REJECT: Send back to    │
+     │              │        │  Coder with fix details   │──┐
+     └──────┬───────┘        └──────────────────────────┘  │
+            │                                              │
+           YES                                             │
+            │                                              │
+            ▼                         ┌────────────────────┘
+     ┌──────────────┐                 │ (Coder fixes, re-triggers
+     │  RELEASE.md  │                 │  Auditor review, loop)
+     │  SHIPPED!    │                 │
+     └──────────────┘                 ▼
+                               Back to SEAT 2
+
+================================================================================
+  7. BAND DESKTOP SETUP & AUTONOMOUS PYTHON AGENTS (100% FREE)
+================================================================================
+
+7.1 PREREQUISITES (ALL 100% FREE — ZERO CREDIT CARDS)
+-----------------------------------------------------
+  - Windows 10/11 (your OS)
+  - Python 3.11+ (installed with "Add to PATH" checked)
+  - BAND account (FREE at app.band.ai — no credit card needed)
+  - BAND Desktop installed (free download from docs.band.ai)
+  - Google AI Studio API Key (FREE at aistudio.google.com — NO credit card!)
+      * Model: Gemini 2.5 Flash / Gemini 2.0 Flash
+      * Generous free tier: 15 Requests/Min, 1,500 Requests/Day, 1M context
+  - Groq Cloud API Key (OPTIONAL FREE BACKUP at console.groq.com — NO credit card!)
+      * Model: Llama 3.3 70B / Qwen 2.5 32B
+      * 100% free tier for blazing fast inference & red-team model diversity
+  - Docker Desktop for Windows (free personal license)
+  - Git for Windows (free)
+
+7.2 INSTALLATION & ENVIRONMENT SETUP
+-------------------------------------
+  1. Download and install BAND Desktop for Windows:
+     https://downloads.band.ai/desktop/latest/windows/jam-windows-x64-setup.exe
+
+  2. Launch BAND Desktop:
+     - Click "Sign in with browser" to log into your free BAND account
+     - Complete readiness check: confirm the local BAND daemon and `band` CLI
+       are detected and active.
+
+  3. Create your project Python virtual environment:
+     cd "F:\Dhruv's\Hackathon\DarkFactory-GhostProcess\ghostprocess-pocketful"
+     python -m venv venv
+     .\venv\Scripts\Activate.ps1
+
+  4. Install BAND Agent SDK and free LLM libraries:
+     pip install band-sdk google-genai groq pydantic httpx pytest
+
+  5. Set your free API keys in your environment (.env or PowerShell):
+     $env:GEMINI_API_KEY = "your-free-gemini-key-from-aistudio.google.com"
+     $env:GROQ_API_KEY = "your-free-groq-key-optional"
+
+7.3 THE 4 AUTONOMOUS PYTHON AGENT SEATS
+---------------------------------------
+  Instead of expensive paid tools like Claude Code, GhostProcess uses
+  autonomous Python agent runners powered by the BAND Python SDK (`band-sdk`)
+  and Google's official `google-genai` SDK (Free Tier).
+
+  Each seat runs as an independent agent connected to the shared BAND room:
+
+  Seat 1 — Architect (`agents/architect.py`):
+    - Connects to BAND Desktop room via `band-sdk`
+    - Loads generic mandate from `mandates/architect.md`
+    - Listens for human task dispatch
+    - Calls Gemini 2.5 Flash to generate `DESIGN.md` & `WORK_ITEMS.md`
+    - Posts artifacts into the BAND room & tags @Coder
+
+  Seat 2 — Coder (`agents/coder.py`):
+    - Connects to BAND Desktop room via `band-sdk`
+    - Loads generic mandate from `mandates/coder.md`
+    - Listens for Architect's handoff
+    - Uses Gemini 2.5 Flash with tool calling to write code to `stage-1/`
+    - Runs unit tests locally with `pytest`
+    - Writes `HANDOFF.md` & tags @GhostAuditor in the room
+
+  Seat 3 — Ghost Auditor (`agents/ghost_auditor.py`):
+    - Connects to BAND Desktop room via `band-sdk`
+    - Loads generic mandate from `mandates/ghost-auditor.md`
+    - Strictly BLIND to `tests/` — reads ONLY `DESIGN.md`
+    - Uses Gemini 2.5 Flash (or Groq Llama 3.3 70B for red-team model diversity)
+    - Generates adversarial attack scripts in `stage-1/adversarial_tests/`
+    - Executes attacks against running code
+    - Posts `AUDIT_REPORT.md` with SURVIVED/BREACHED status to the room
+
+  Seat 4 — Gatekeeper (`agents/gatekeeper.py`):
+    - Connects to BAND Desktop room via `band-sdk`
+    - Loads generic mandate from `mandates/gatekeeper.md`
+    - Waits for BOTH Coder HANDOFF.md and Ghost Auditor AUDIT_REPORT.md
+    - Verifies test logs independently
+    - If breaches found: posts rejection with fix list & tags @Coder (loop)
+    - If all survived: posts `RELEASE.md` and marks build complete
+
+  Launching all seats:
+    Run the master orchestrator in PowerShell:
+      python agents/run_factory.py
+    All 4 agents register with BAND Desktop and appear as "Connected" in the room!
+
+7.4 DISPATCHING THE TASK
+--------------------------
+  Once all 4 seats are connected and visible in BAND Desktop, YOU paste the
+  task into the room. This is your ONLY human input. After this, hands off.
+
+  Task message (paste into the BAND room):
+  """
+  Build a wallet and payments JSON API service. Requirements:
+
+  1. Users can create wallets with unique IDs
+  2. Users can transfer money between wallets
+  3. Money must NEVER be created, destroyed, or spent twice
+  4. All write operations must be idempotent (retry-safe)
+  5. All balance changes must be atomic (no partial transfers)
+  6. The system must handle concurrent transfer requests correctly
+  7. Monetary amounts must use exact decimal arithmetic (no floats)
+  8. The API must support state import/export for testing
+  9. The service must run from a Docker container with no network
+  10. Include a health check endpoint
+
+  Use Python + FastAPI + SQLite. Use double-entry bookkeeping.
+  Implement as a JSON REST API in the stage-1/ directory.
+  """
+
+  NOTE: This task message is NOT part of the mandates. Mandates are generic.
+  This task is specific to Pocketful Stage 1.
+
+================================================================================
+  8. TECH STACK SUMMARY
+================================================================================
+
+  FACTORY INFRASTRUCTURE (100% FREE — $0.00 SPENT):
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ Platform       │ BAND Desktop (Agent room & control plane)       │
+  │ Agent Runtime  │ BAND Python SDK (`band-sdk`)                    │
+  │ Primary Model  │ Google Gemini 2.5 Flash (FREE on AI Studio)     │
+  │                │ - 15 RPM, 1,500 req/day, 1M context, $0 cost    │
+  │ Red-Team Model │ Groq Cloud API (Llama 3.3 70B — FREE tier)      │
+  │ Local Backup   │ Ollama (Qwen 2.5 Coder / Llama 3.1 — 100% Free) │
+  │ Rate Limiter   │ Token-bucket / 4-second request pacing          │
+  │ Daemon         │ Local band connection / desktop daemon          │
+  │ Total API Cost │ $0.00 (Zero paid APIs, zero subscriptions)      │
+  └──────────────────────────────────────────────────────────────────┘
+
+  APPLICATION STACK:
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ Language       │ Python 3.11+                                    │
+  │ Framework      │ FastAPI                                         │
+  │ ASGI Server    │ Uvicorn                                         │
+  │ Database       │ SQLite 3                                        │
+  │ ORM            │ SQLAlchemy (async)                              │
+  │ Validation     │ Pydantic v2                                     │
+  │ Decimal Math   │ Python decimal.Decimal                          │
+  │ Testing        │ pytest + httpx (async test client)              │
+  │ Container      │ Docker (python:3.11-slim base)                  │
+  │ Frontend (S2)  │ Vanilla HTML5 / CSS / JS or React + Vite        │
+  └──────────────────────────────────────────────────────────────────┘
+
+  KEY LIBRARIES:
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ band-sdk        │ BAND agent collaboration SDK                   │
+  │ google-genai    │ Google Gemini API client (Free tier)           │
+  │ groq            │ Groq Cloud client (Free tier fallback)         │
+  │ fastapi         │ Web framework                                  │
+  │ uvicorn         │ ASGI server                                    │
+  │ sqlalchemy      │ ORM + async engine                             │
+  │ aiosqlite       │ Async SQLite driver                            │
+  │ pydantic        │ Request/response validation                    │
+  │ httpx           │ Async HTTP client (for tests)                  │
+  │ pytest          │ Test runner                                    │
+  │ pytest-asyncio  │ Async test support                             │
+  └──────────────────────────────────────────────────────────────────┘
+
+================================================================================
+  9. REPOSITORY STRUCTURE
+================================================================================
+
+  ghostprocess/
+  ├── FACTORY.md                  # Factory description (required)
+  ├── README.md                   # Project overview
+  ├── PROJECT_CONTEXT.md          # Architecture rules & invariants
+  ├── agents/                     # 100% FREE autonomous Python seats
+  │   ├── config.py               # Env vars, keys, model configs
+  │   ├── gemini_client.py        # Gemini free API client + 15 RPM pacer
+  │   ├── architect.py            # Seat 1 agent loop
+  │   ├── coder.py                # Seat 2 agent loop (code + tests)
+  │   ├── ghost_auditor.py        # Seat 3 adversarial red-team loop
+  │   ├── gatekeeper.py           # Seat 4 judge verification loop
+  │   └── run_factory.py          # Master launcher for all 4 seats
+  ├── mandates/                   # Generic agent mandates (required)
+  │   ├── architect.md
+  │   ├── coder.md
+  │   ├── ghost-auditor.md
+  │   └── gatekeeper.md
+  ├── room-export/                # BAND room export (required)
+  │   └── room-export.json
+  ├── stage-1/                    # Stage 1 implementation
+  │   ├── Dockerfile
+  │   ├── requirements.txt
+  │   ├── app/
+  │   │   ├── __init__.py
+  │   │   ├── main.py             # FastAPI app entry
+  │   │   ├── models.py           # SQLAlchemy models
+  │   │   ├── schemas.py          # Pydantic schemas
+  │   │   ├── database.py         # DB connection + session
+  │   │   ├── routes/
+  │   │   │   ├── wallets.py
+  │   │   │   ├── transfers.py
+  │   │   │   └── state.py
+  │   │   └── services/
+  │   │       ├── wallet_service.py
+  │   │       └── transfer_service.py
+  │   ├── tests/
+  │   │   ├── test_wallets.py
+  │   │   ├── test_transfers.py
+  │   │   ├── test_idempotency.py
+  │   │   └── test_state.py
+  │   └── adversarial_tests/      # Ghost Auditor's attack suite
+  │       ├── test_double_spend.py
+  │       ├── test_race_conditions.py
+  │       ├── test_rounding.py
+  │       ├── test_input_fuzzing.py
+  │       └── test_state_corruption.py
+  ├── stage-2/                    # Stage 2 (if completed)
+  │   └── ...
+  ├── DESIGN.md                   # Architect's output
+  ├── WORK_ITEMS.md               # Architect's work breakdown
+  ├── HANDOFF.md                  # Coder's handoff report
+  ├── AUDIT_REPORT.md             # Ghost Auditor's report
+  └── RELEASE.md                  # Gatekeeper's acceptance
+
+================================================================================
+  10. JUDGING CRITERIA ALIGNMENT
+================================================================================
+
+  50% FACTORY (how good is the factory itself?)
+  ┌─────────────────────────────────────────────────────────────────┐
+  │ Criteria                        │ How GhostProcess addresses it │
+  ├─────────────────────────────────┼───────────────────────────────┤
+  │ Generic mandates                │ All 4 mandates are fully      │
+  │                                 │ generic — zero track-specific │
+  │                                 │ content. Test: hand them to   │
+  │                                 │ a Tablekeeper team, they work │
+  ├─────────────────────────────────┼───────────────────────────────┤
+  │ Reusable factory                │ The adversarial pattern works │
+  │                                 │ for ANY software project.     │
+  │                                 │ Point it at a different spec  │
+  │                                 │ and it still works.           │
+  ├─────────────────────────────────┼───────────────────────────────┤
+  │ FACTORY.md documentation        │ Full factory description with │
+  │                                 │ seat setup, design rationale, │
+  │                                 │ measured costs, and recovery  │
+  │                                 │ mechanisms                    │
+  ├─────────────────────────────────┼───────────────────────────────┤
+  │ How far through stages          │ Target: Stage 1 complete,     │
+  │                                 │ Stage 2 started               │
+  ├─────────────────────────────────┼───────────────────────────────┤
+  │ Catches and recovers from       │ The ENTIRE design is about    │
+  │ bad work                        │ catching bad work! Ghost      │
+  │                                 │ Auditor actively hunts bugs.  │
+  │                                 │ Gatekeeper rejects and sends  │
+  │                                 │ back for fixes.               │
+  └─────────────────────────────────┴───────────────────────────────┘
+
+  25% APP (what the factory built)
+  ┌─────────────────────────────────────────────────────────────────┐
+  │ Coherent, presentation-ready    │ FastAPI provides automatic    │
+  │                                 │ Swagger UI. Stage 2 adds      │
+  │                                 │ responsive web UI.            │
+  ├─────────────────────────────────┼───────────────────────────────┤
+  │ Maintainable code               │ Clean Python with FastAPI     │
+  │                                 │ best practices, Pydantic      │
+  │                                 │ validation, proper structure  │
+  └─────────────────────────────────┴───────────────────────────────┘
+
+  25% AGENT TEAMWORK (did agents actually collaborate?)
+  ┌─────────────────────────────────────────────────────────────────┐
+  │ Collaboration                   │ 4 agents with clear handoffs: │
+  │                                 │ Architect -> Coder -> Auditor │
+  │                                 │ -> Gatekeeper. Each depends   │
+  │                                 │ on the previous agent's work. │
+  ├─────────────────────────────────┼───────────────────────────────┤
+  │ Autonomy                        │ After human dispatch, ZERO    │
+  │                                 │ human input. Agents handle    │
+  │                                 │ the full loop including       │
+  │                                 │ rejection and re-work.        │
+  └─────────────────────────────────┴───────────────────────────────┘
+
+================================================================================
+  11. TIMELINE — 2-DAY BATTLE PLAN
+================================================================================
+
+  DAY 1 (Oct 3-4): SETUP + FACTORY DESIGN
+  ─────────────────────────────────────────
+  Morning:
+    [ ] Download & install BAND Desktop
+    [ ] Create BAND account at app.band.ai (Free, no card)
+    [ ] Join BAND Discord for support
+    [ ] Get 100% FREE Gemini API key from Google AI Studio (aistudio.google.com)
+    [ ] (Optional) Get free Groq API key from console.groq.com
+    [ ] Set up Python virtual environment & install band-sdk, google-genai
+    [ ] Run test agent to verify connection with BAND Desktop room
+
+  Afternoon:
+    [ ] Write all 4 mandate files (architect.md, coder.md, etc.)
+    [ ] Create GitHub repository: ghostprocess-pocketful
+    [ ] Set up initial project structure (folders, README, agents/)
+    [ ] DRY RUN: Test factory with a SIMPLE task first
+        (e.g., "Build a calculator API with add/subtract")
+    [ ] Fix any mandate/handoff issues from dry run
+
+  Evening:
+    [ ] Refine mandates based on dry run learnings
+    [ ] Prepare the Pocketful Stage 1 task dispatch message
+    [ ] Pre-write FACTORY.md (factory description document)
+
+  DAY 2 (Oct 4-5): EXECUTE + SUBMIT
+  ───────────────────────────────────
+  Morning:
+    [ ] DISPATCH: Paste Pocketful Stage 1 task into BAND room
+    [ ] RECORD: Start recording the BAND Desktop room
+    [ ] MONITOR: Watch agents work (don't intervene!)
+    [ ] If agents get stuck: note the issue but DON'T steer
+
+  Afternoon:
+    [ ] Verify Stage 1 code builds and runs in Docker
+    [ ] Run the test harness if available
+    [ ] If time: dispatch Stage 2 task
+    [ ] Export the BAND room
+
+  Evening:
+    [ ] Organize GitHub repo (stage-1/, mandates/, room-export/)
+    [ ] Record walkthrough video showing:
+        1. The BAND Desktop room recording
+        2. The factory architecture explanation
+        3. The adversarial testing results
+        4. The running application
+    [ ] Fill out lablab.ai submission form
+    [ ] SUBMIT before Oct 6 12:29 PM IST deadline
+
+================================================================================
+  12. RISK MITIGATION
+================================================================================
+
+  RISK: BAND Desktop doesn't work properly on Windows
+  MITIGATION: Join BAND Discord early. Have Linux VM ready as backup.
+  Many participants reported issues (see "bandisworstforme" submission).
+
+  RISK: Gemini Free Tier rate limits (15 RPM)
+  MITIGATION: The free tier provides 15 RPM and 1,500 requests/day at $0.00.
+  Add request pacing (3-4 second sleep between LLM calls) in `gemini_client.py`.
+  If rate limits are ever approached, the client automatically falls back to
+  Groq Cloud's free tier (Llama 3.3 70B), ensuring zero downtime and 100% free operation.
+
+  RISK: Agents don't collaborate well / get confused
+  MITIGATION: Do a dry run with a simple task first. Refine mandates
+  based on what breaks. Keep mandates short and specific.
+
+  RISK: Not enough time for Stage 2
+  MITIGATION: Stage 1 alone is enough to be eligible. Focus on making
+  Stage 1 + the factory design excellent rather than rushing Stage 2.
+
+  RISK: Adversarial tests are too aggressive / break the pipeline
+  MITIGATION: Ghost Auditor mandate includes clear output format.
+  Gatekeeper has clear decision rules. The loop is bounded.
+
+================================================================================
+  13. WHAT MAKES GHOSTPROCESS UNIQUE
+================================================================================
+
+  Looking at ALL current submissions on lablab.ai:
+
+  - "Fail Closed": Auditor can't edit code (tool denial). GhostProcess
+    goes further — auditor actively GENERATES attacks.
+
+  - "Four Seats Factory": Focuses on evidence reproduction. GhostProcess
+    focuses on evidence GENERATION through adversarial testing.
+
+  - "Obsidian Foundry": Tester writes tests from spec. GhostProcess's
+    Ghost Auditor writes ATTACKS from spec — adversarial, not just tests.
+
+  - "Pocketful Dark Factory": Standard 3-agent pipeline. GhostProcess
+    adds the adversarial 4th agent as a differentiator.
+
+  UNIQUE SELLING POINTS:
+  1. Red-team agent that generates attacks, not just runs tests
+  2. Courtroom metaphor (defense vs prosecution vs judge)
+  3. Ghost Auditor is blind to implementation tests — independent verification
+  4. Explicit feedback loop: reject -> fix -> re-audit -> accept
+  5. The factory ITSELF is designed to catch the hardest bugs in payments
+
+================================================================================
+  14. SUBMISSION CHECKLIST
+================================================================================
+
+  Required:
+  [ ] Public GitHub repository
+  [ ] At least 3 agent seats with mandate files
+  [ ] stage-1/ folder with complete, buildable service
+  [ ] FACTORY.md (seat setup, design rationale, costs, recovery)
+  [ ] BAND Desktop room export
+  [ ] Video with:
+      [ ] BAND Desktop room recording (MANDATORY — no video = disqualified)
+      [ ] Walkthrough of the factory and result
+  [ ] Service builds and runs from clean Docker container (no network)
+
+  lablab.ai form:
+  [ ] Project title: "GhostProcess: Adversarial Dark Factory"
+  [ ] Short description
+  [ ] Long description
+  [ ] Technology & category tags
+  [ ] Cover image
+  [ ] Video presentation
+  [ ] GitHub repository link
+
+================================================================================
+                       LET'S GO BUILD THIS 🚀
+================================================================================
