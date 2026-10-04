@@ -271,10 +271,10 @@ sequenceDiagram
 
 ### 5.1 Mandate Decoupling Architecture
 To satisfy hackathon anti-cheating regulations, each agent operates under an independent, 100% generic standing mandate stored in `mandates/`:
-- **Seat 1 (Architect):** [`mandates/architect.md`](file:///e:/DarkFactory-GhostProcess/mandates/architect.md)
-- **Seat 2 (Coder):** [`mandates/coder.md`](file:///e:/DarkFactory-GhostProcess/mandates/coder.md)
-- **Seat 3 (Ghost Auditor):** [`mandates/ghost-auditor.md`](file:///e:/DarkFactory-GhostProcess/mandates/ghost-auditor.md)
-- **Seat 4 (Gatekeeper):** [`mandates/gatekeeper.md`](file:///e:/DarkFactory-GhostProcess/mandates/gatekeeper.md)
+- **Seat 1 (Architect):** [`Agents_Context/architect.md`](file:///e:/DarkFactory-GhostProcess/Agents_Context/architect.md)
+- **Seat 2 (Coder):** [`Agents_Context/coder.md`](file:///e:/DarkFactory-GhostProcess/Agents_Context/coder.md)
+- **Seat 3 (Ghost Auditor):** [`Agents_Context/ghost-auditor.md`](file:///e:/DarkFactory-GhostProcess/Agents_Context/ghost-auditor.md)
+- **Seat 4 (Gatekeeper):** [`Agents_Context/gatekeeper.md`](file:///e:/DarkFactory-GhostProcess/Agents_Context/gatekeeper.md)
 
 *Note: Mandates contain zero track-specific vocabulary ("wallet", "transfer", "Pocketful", "FastAPI") to ensure complete domain abstraction.*
 
@@ -307,7 +307,7 @@ ghostprocess/
 ├── README.md                   # Quickstart, video demo link, & submission info
 ├── requirements.txt            # Root dependencies (band-sdk, groq, google-genai, etc.)
 ├── .env                        # GROQ_API_KEY & GEMINI_API_KEY (git-ignored)
-├── mandates/                   # 100% Generic standing mandates
+├── Agents_Context/             # 100% Generic standing mandates
 │   ├── architect.md            # Generic system blueprint mandate
 │   ├── coder.md                # Generic implementation & developer testing mandate
 │   ├── ghost-auditor.md        # Generic adversarial black-box attack mandate
