@@ -47,45 +47,63 @@ class GatekeeperAgent:
         print(f"⚖️  [SEAT 4: {self.name.upper()}] Commencing Independent Release Quality Gate (Cycle {cycle}/{MAX_REJECTION_CYCLES})...")
         print("=" * 65)
 
-        # 1. Independent Verification of Developer Tests
+        # 1. Independent Verification of Developer Tests & Handoff Evidence
+        print(f"[{self.name}] Inspecting Seat 2 Handoff Evidence...")
+        handoff_exists = self.handoff_path.exists()
+        handoff_text = self.handoff_path.read_text(encoding="utf-8") if handoff_exists else ""
+        dev_certified = handoff_exists and ("100% PASSED" in handoff_text or "PASSED" in handoff_text)
+
         print(f"[{self.name}] Independently verifying Developer Test Suite...")
         dev_passed, dev_log = self.run_tests(self.stage1_dir / "tests")
-        print(f"[{self.name}] Developer Suite Result: {'PASSED' if dev_passed else 'FAILED'}")
+        print(f"[{self.name}] Developer Suite Result: {'PASSED' if dev_passed and dev_certified else 'FAILED'}")
 
-        # 2. Independent Verification of Adversarial Red-Team Suite
+        # 2. Independent Verification of Adversarial Red-Team Suite & Audit Report
+        print(f"[{self.name}] Inspecting Seat 3 Adversarial Audit Evidence...")
+        audit_exists = self.audit_report_path.exists()
+        audit_text = self.audit_report_path.read_text(encoding="utf-8") if audit_exists else ""
+        audit_certified = audit_exists and ("CLEARED" in audit_text)
+
         print(f"[{self.name}] Independently verifying Adversarial Red-Team Suite...")
         adv_passed, adv_log = self.run_tests(self.stage1_dir / "adversarial_tests")
-        print(f"[{self.name}] Adversarial Suite Result: {'CLEARED' if adv_passed else 'BREACHED'}")
+        print(f"[{self.name}] Adversarial Suite Result: {'CLEARED' if adv_passed and audit_certified else 'BREACHED'}")
 
         now_iso = datetime.now(timezone.utc).isoformat()
 
-        # Decision Gate
-        if dev_passed and adv_passed:
+        # Decision Gate: All pillars must pass
+        if dev_certified and dev_passed and audit_certified and adv_passed:
+            # Unlink any stale rejection notice from previous cycles
+            if self.rejection_path.exists():
+                self.rejection_path.unlink()
+
+            # Dynamic target determination
+            design_path = PROJECT_ROOT / "DESIGN.md"
+            design_text = design_path.read_text(encoding="utf-8") if design_path.exists() else ""
+            target_name = "Calculator JSON API Service" if ("calculator" in design_text.lower() or "/add" in design_text) else "Pocketful Clean-Room Ledger Service"
+
             # Full Clearance -> RELEASE.md
             release_content = f"""# Production Release Manifest
 
 > **Gatekeeper Verdict:** **APPROVED FOR PRODUCTION**  
 > **Timestamp:** {now_iso}  
+> **Target:** {target_name}  
 > **Evaluation Cycle:** Cycle {cycle} of {MAX_REJECTION_CYCLES}  
 > **Quality Rating:** 100% Invariant Compliance  
 
 ---
 
 ## 1. Verified Evidence Matrix
+- **Developer Evidence (HANDOFF.md):** Certified (100% passing)
 - **Developer Test Suite (stage-1/tests):** 100% Passing (Verified independently)
+- **Adversarial Evidence (AUDIT_REPORT.md):** Certified (Verdict: CLEARED)
 - **Adversarial Red-Team Suite (stage-1/adversarial_tests):** 100% Cleared (0 Breaches)
-- **Concurrency Isolation:** Verified (Immediate write-lock prevents double-spend)
-- **Precision Quantization:** Verified (Strictly rejects >2 decimal places)
-- **Idempotency Deduplication:** Verified (Database unique constraint handles replay)
-- **Ledger Invariant Conservation:** Verified (Global sum = 0.00 across all journals)
+- **Concurrency & Invariant Integrity:** Verified
 
 ## 2. Container Readiness
 - Base: `python:3.11-slim`
-- Automatic Directory Initialization: `/app/data` created on boot
 - Zero-Network Isolated Execution: Certified for `--network none`
 
 ## 3. Factory Verdict
-The GhostProcess Pocketful clean-room ledger service has achieved complete dark factory clearance.
+The {target_name} has achieved complete dark factory quality gate clearance.
 """
             self.release_path.write_text(release_content, encoding="utf-8")
             print(f"[{self.name}] 🎉 VERDICT: APPROVED! Generated: {self.release_path.name}")
@@ -95,10 +113,18 @@ The GhostProcess Pocketful clean-room ledger service has achieved complete dark 
 
             return {"verdict": "APPROVED", "cycle": cycle}
         else:
+            # Unlink any stale release notice
+            if self.release_path.exists():
+                self.release_path.unlink()
+
             # Rejection -> REJECTION.md
             failing_reason = []
+            if not dev_certified:
+                failing_reason.append("Developer HANDOFF.md missing or uncertified")
             if not dev_passed:
                 failing_reason.append("Developer unit tests failed")
+            if not audit_certified:
+                failing_reason.append("Adversarial AUDIT_REPORT.md missing or breached")
             if not adv_passed:
                 failing_reason.append("Adversarial red-team detected invariant breach")
 

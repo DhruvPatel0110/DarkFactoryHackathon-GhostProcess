@@ -80,7 +80,11 @@ class ArchitectAgent:
         )
 
         print(f"[{self.name}] Analyzing requirements & synthesizing design via LLM engine...")
-        raw_output = await llm_client.generate(prompt=prompt, system_prompt=system_prompt, temperature=0.1)
+        try:
+            raw_output = await llm_client.generate(prompt=prompt, system_prompt=system_prompt, temperature=0.1)
+        except Exception as e:
+            print(f"[{self.name}] Error during LLM architecture synthesis: {e}")
+            return {"status": "FAILED", "error": str(e)}
 
         # Parse output delimiters
         design_content = ""

@@ -42,17 +42,17 @@ class GhostAuditorAgent:
     async def execute_audit(self) -> dict:
         print("\n" + "=" * 65)
         print(f"🔴 [SEAT 3: {self.name.upper()}] Launching Blind Adversarial Red-Team Attacks...")
-        print("=" * 65)
+        # Universal Directory Isolation: Purge adversarial test dir before writing new vectors
+        import shutil
+        if self.adv_dir.exists():
+            shutil.rmtree(self.adv_dir)
+        self.adv_dir.mkdir(parents=True, exist_ok=True)
 
         design_text = (PROJECT_ROOT / "DESIGN.md").read_text(encoding="utf-8") if (PROJECT_ROOT / "DESIGN.md").exists() else ""
         is_calc = "calculator" in design_text.lower() or "/add" in design_text or "/divide" in design_text
 
         if is_calc:
             print(f"[{self.name}] Detected Calculator API spec. Crafting adversarial attack vectors...")
-            import shutil
-            if self.adv_dir.exists():
-                shutil.rmtree(self.adv_dir)
-            self.adv_dir.mkdir(parents=True, exist_ok=True)
 
             conftest_py = '''import sys
 from pathlib import Path

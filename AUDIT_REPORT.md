@@ -34,7 +34,7 @@ adversarial_tests/test_precision_rounding.py::test_adversarial_precision_and_sha
 adversarial_tests/test_state_corruption.py::test_adversarial_state_import_zero_sum_rejection PASSED [ 83%]
 adversarial_tests/test_sum_check.py::test_adversarial_ledger_zero_sum_conservation PASSED [100%]
 
-============================== 6 passed in 0.45s ==============================
+============================== 6 passed in 0.55s ==============================
 ```
 
 ## 3. Findings Summary
