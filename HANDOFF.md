@@ -34,7 +34,7 @@ tests/test_wallets.py::test_create_and_get_wallet PASSED                 [ 71%]
 tests/test_wallets.py::test_get_nonexistent_wallet PASSED                [ 85%]
 tests/test_wallets.py::test_wallet_idempotency_replay PASSED             [100%]
 
-============================== 7 passed in 0.37s ==============================
+============================== 7 passed in 0.43s ==============================
 ```
 
 ## 3. Ready for Red-Team Audit

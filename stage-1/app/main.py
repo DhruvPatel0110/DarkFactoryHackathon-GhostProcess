@@ -13,11 +13,21 @@ async def lifespan(app: FastAPI):
     yield
     await engine.dispose()
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="GhostProcess Pocketful Engine",
     description="Venmo-like Clean-Room Wallet & Double-Entry Payment Ledger",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Exception handlers

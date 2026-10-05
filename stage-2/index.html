@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GhostProcess — Pocketful Autonomous Ledger</title>
+  <meta name="description" content="Clean-room autonomous double-entry payments engine and zero-sum financial ledger dashboard.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0a0a'/%3E%3Cpath d='M16 6c-5.5 0-9 4-9 9.5 0 3.5 1.5 6 3 7.5v3l3-1.5 3 1.5 3-1.5 3 1.5v-3c1.5-1.5 3-4 3-7.5C25 10 21.5 6 16 6z' fill='%23dc2626'/%3E%3Ccircle cx='13' cy='14' r='1.5' fill='%23fafafa'/%3E%3Ccircle cx='19' cy='14' r='1.5' fill='%23fafafa'/%3E%3C/svg%3E">
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <!-- Noise Texture Grain Overlay -->
+  <div class="noise-overlay" aria-hidden="true"></div>
+
+  <!-- App Header & Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <a href="#dashboard" class="brand-link" id="brand-logo">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2C6.5 2 3 6.5 3 12c0 3.5 1.8 6.5 3.5 8.2v1.8l2.75-1.5 2.75 1.5 2.75-1.5 2.75 1.5v-1.8C19.2 18.5 21 15.5 21 12c0-5.5-3.5-10-9-10z" fill="var(--accent)" stroke="var(--accent-hover)"/>
+              <circle cx="9" cy="11" r="1.5" fill="#fafafa"/>
+              <circle cx="15" cy="11" r="1.5" fill="#fafafa"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">GHOSTPROCESS</span>
+            <span class="brand-subtitle">POCKETFUL LEDGER</span>
+          </div>
+        </a>
+        <div class="factory-pill">
+          <span class="pulse-dot"></span>
+          <span>DARK FACTORY ACTIVE</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu" id="primary-navigation" aria-label="Main Navigation">
+        <a href="#dashboard" class="nav-item active" data-route="dashboard" id="nav-dashboard">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="9" rx="1"/>
+            <rect x="14" y="3" width="7" height="5" rx="1"/>
+            <rect x="14" y="12" width="7" height="9" rx="1"/>
+            <rect x="3" y="16" width="7" height="5" rx="1"/>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="#wallets" class="nav-item" data-route="wallets" id="nav-wallets">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+            <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+            <path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>
+          </svg>
+          <span>Wallets</span>
+        </a>
+        <a href="#transfer" class="nav-item" data-route="transfer" id="nav-transfer">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="17 1 21 5 17 9"/>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          </svg>
+          <span>Transfer Engine</span>
+        </a>
+        <a href="#audit" class="nav-item" data-route="audit" id="nav-audit">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+          <span>Zero-Sum Audit</span>
+        </a>
+      </nav>
+
+      <div class="header-actions">
+        <div class="health-indicator" id="system-health-pill" title="Backend Status">
+          <span class="health-dot" id="health-dot"></span>
+          <span class="health-label" id="health-label">API: Checking...</span>
+        </div>
+
+        <button class="btn btn-ghost btn-sm" id="btn-seed-data" title="Seed Demo Wallets & Transactions">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Seed Demo</span>
+        </button>
+
+        <button class="btn btn-primary btn-sm" id="btn-quick-transfer">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>New Transfer</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Invariant Bar Strip -->
+  <div class="invariant-strip" id="global-invariant-strip">
+    <div class="invariant-strip-content">
+      <div class="invariant-item">
+        <span class="invariant-tag">INVARIANT 01</span>
+        <span class="invariant-name">Double-Entry Zero-Sum:</span>
+        <span class="mono invariant-status" id="strip-zero-sum">Σ = 0.00</span>
+      </div>
+      <div class="invariant-divider"></div>
+      <div class="invariant-item">
+        <span class="invariant-tag">INVARIANT 02</span>
+        <span class="invariant-name">Non-Negative Balances:</span>
+        <span class="invariant-status active">STRICT</span>
+      </div>
+      <div class="invariant-divider"></div>
+      <div class="invariant-item">
+        <span class="invariant-tag">INVARIANT 03</span>
+        <span class="invariant-name">Idempotency Hash:</span>
+        <span class="invariant-status active">ATOMIC</span>
+      </div>
+      <div class="invariant-divider"></div>
+      <div class="invariant-item">
+        <span class="invariant-tag">INVARIANT 04</span>
+        <span class="invariant-name">Storage Precision:</span>
+        <span class="invariant-status active">EXACT 2-DECIMAL</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main View Container -->
+  <main class="main-content" id="app-root" role="main">
+    <!-- Views rendered dynamically by router -->
+    <div class="view-loading-skeleton">
+      <div class="shimmer-block" style="height: 120px; margin-bottom: 24px;"></div>
+      <div class="shimmer-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
+        <div class="shimmer-block" style="height: 110px;"></div>
+        <div class="shimmer-block" style="height: 110px;"></div>
+        <div class="shimmer-block" style="height: 110px;"></div>
+        <div class="shimmer-block" style="height: 110px;"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <span class="footer-title">GhostProcess Pocketful Engine</span>
+        <span class="footer-meta">Autonomous Dark Factory Hackathon | Pure Machine Execution</span>
+      </div>
+      <div class="footer-right">
+        <span class="footer-badge">BAND Mesh Room: DarkFactory-GhostProcess</span>
+        <span class="footer-badge">Docker: --network none safe</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal Overlay Container -->
+  <div class="modal-backdrop" id="modal-backdrop" aria-hidden="true">
+    <div class="modal-container" id="modal-container" role="dialog" aria-modal="true">
+      <!-- Modal dynamically injected -->
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Application Entry Script -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
