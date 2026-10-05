@@ -138,12 +138,10 @@ export const api = {
         { id: wReserve.id, name: "DarkFactory Reserve" }
       ],
       journal_entries: [
-        { transaction_id: "GENESIS-01", wallet_id: wReserve.id, amount: "1000.00", entry_type: "CREDIT" },
-        { transaction_id: "GENESIS-01", wallet_id: wAlice.id, amount: "-1000.00", entry_type: "DEBIT" },
-        { transaction_id: "GENESIS-02", wallet_id: wAlice.id, amount: "1500.00", entry_type: "CREDIT" },
-        { transaction_id: "GENESIS-02", wallet_id: wCharlie.id, amount: "-1500.00", entry_type: "DEBIT" },
-        { transaction_id: "GENESIS-03", wallet_id: wCharlie.id, amount: "2000.00", entry_type: "CREDIT" },
-        { transaction_id: "GENESIS-03", wallet_id: wReserve.id, amount: "-2000.00", entry_type: "DEBIT" }
+        { transaction_id: "GENESIS-01", wallet_id: wReserve.id, amount: "-4500.00", entry_type: "DEBIT" },
+        { transaction_id: "GENESIS-01", wallet_id: wAlice.id, amount: "1500.00", entry_type: "CREDIT" },
+        { transaction_id: "GENESIS-01", wallet_id: wBob.id, amount: "1000.00", entry_type: "CREDIT" },
+        { transaction_id: "GENESIS-01", wallet_id: wCharlie.id, amount: "2000.00", entry_type: "CREDIT" }
       ]
     };
 

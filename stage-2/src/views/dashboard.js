@@ -25,7 +25,9 @@ export async function renderDashboard(root) {
       api.exportState().catch(() => null)
     ]);
 
-    const totalSystemBalance = wallets.reduce((sum, w) => sum + parseFloat(w.balance || 0), 0);
+    const totalSystemBalance = wallets
+      .filter(w => parseFloat(w.balance || 0) > 0)
+      .reduce((sum, w) => sum + parseFloat(w.balance || 0), 0);
     const ledgerSum = stateExport ? stateExport.ledger_sum : '0.00';
     const isBalanced = parseFloat(ledgerSum) === 0;
 
