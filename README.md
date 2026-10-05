@@ -10,7 +10,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)](https://opensource.org/licenses/MIT)
 
 > **WeAreDevelopers x BAND Dark Factory Hackathon — Pocketful Track**  
-> An autonomous dark factory where **Seat 3 (Ghost Auditor)** actively attacks the code produced by **Seat 2 (Coder)** using a blind red-team methodology. Only code that survives adversarial stress-testing is certified for production.
+> An autonomous dark factory where **Seat 3 (Ghost Auditor)** actively attacks the code produced by **Seat 2 (Coder)** using a blind red-team methodology. Only code that survives adversarial stress-testing is certified for production.  
+>  
+> 📖 **Judges & Evaluators Quickstart:** Read the step-by-step **[HOW_TO_RUN.md](HOW_TO_RUN.md)** guide to evaluate in under 60 seconds.
 
 ---
 
