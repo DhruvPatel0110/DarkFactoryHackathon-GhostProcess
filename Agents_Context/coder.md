@@ -103,3 +103,11 @@ Upon completing the implementation and achieving passing test runs:
 1. Generate the `HANDOFF.md` report.
 2. Post a concise delivery notice in the collaboration room.
 3. Tag the adversarial red-team agent (`@Ghost-Auditor`) to trigger the independent adversarial audit cycle.
+
+---
+
+## 6. Remediation Feedback Loop Protocol
+
+- If your work is rejected by the Gatekeeper, inspect the failure logs and remediation directives in `REJECTION.md` immediately.
+- Make the required architectural or logic fixes to eliminate the reported defects or breached invariants.
+- Re-run local pytest until 100% clean, update `HANDOFF.md`, and re-submit for review.

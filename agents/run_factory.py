@@ -78,9 +78,12 @@ async def launch_dark_factory(task_prompt: str):
     print(f"\n[ALERT] Reached maximum allowed revision cycles ({MAX_REJECTION_CYCLES}). Escalate to human review.")
 
 if __name__ == "__main__":
-    task = (
-        "Construct the complete Stage 1 Pocketful payments and double-entry ledger backend. "
-        "Strict double-entry, zero-sum conservation, exact decimal strings, idempotency replay, "
-        "and clean container startup under --network none."
-    )
+    if len(sys.argv) > 1:
+        task = " ".join(sys.argv[1:])
+    else:
+        task = (
+            "Construct the complete Stage 1 Pocketful payments and double-entry ledger backend. "
+            "Strict double-entry, zero-sum conservation, exact decimal strings, idempotency replay, "
+            "and clean container startup under --network none."
+        )
     asyncio.run(launch_dark_factory(task))

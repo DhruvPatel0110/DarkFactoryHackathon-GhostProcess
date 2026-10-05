@@ -44,6 +44,117 @@ class GhostAuditorAgent:
         print(f"🔴 [SEAT 3: {self.name.upper()}] Launching Blind Adversarial Red-Team Attacks...")
         print("=" * 65)
 
+        design_text = (PROJECT_ROOT / "DESIGN.md").read_text(encoding="utf-8") if (PROJECT_ROOT / "DESIGN.md").exists() else ""
+        is_calc = "calculator" in design_text.lower() or "/add" in design_text or "/divide" in design_text
+
+        if is_calc:
+            print(f"[{self.name}] Detected Calculator API spec. Crafting adversarial attack vectors...")
+            import shutil
+            if self.adv_dir.exists():
+                shutil.rmtree(self.adv_dir)
+            self.adv_dir.mkdir(parents=True, exist_ok=True)
+
+            conftest_py = '''import sys
+from pathlib import Path
+
+STAGE_DIR = Path(__file__).resolve().parent.parent
+if str(STAGE_DIR) not in sys.path:
+    sys.path.insert(0, str(STAGE_DIR))
+
+import pytest_asyncio
+import pytest
+from httpx import AsyncClient, ASGITransport
+from app.main import app
+
+@pytest_asyncio.fixture
+async def client():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as c:
+        yield c
+'''
+            self.write_attack_script("conftest.py", conftest_py)
+
+            test_attacks_py = '''import pytest
+
+@pytest.mark.asyncio
+async def test_adversarial_zero_division_variants(client):
+    # Attack: Positive zero division
+    res1 = await client.post("/divide", json={"a": 100, "b": 0})
+    assert res1.status_code == 400
+    
+    # Attack: Zero divided by zero
+    res2 = await client.post("/divide", json={"a": 0, "b": 0})
+    assert res2.status_code == 400
+
+    # Attack: Negative numerator divided by zero
+    res3 = await client.post("/divide", json={"a": -50.5, "b": 0})
+    assert res3.status_code == 400
+
+@pytest.mark.asyncio
+async def test_adversarial_payload_fuzzing(client):
+    # Attack: String operand injection
+    res_str = await client.post("/add", json={"a": "malicious_string", "b": 5})
+    assert res_str.status_code in [400, 422]
+
+    # Attack: Missing operand
+    res_missing = await client.post("/multiply", json={"a": 10})
+    assert res_missing.status_code in [400, 422]
+
+    # Attack: Null operand injection
+    res_null = await client.post("/subtract", json={"a": None, "b": 2})
+    assert res_null.status_code in [400, 422]
+
+@pytest.mark.asyncio
+async def test_adversarial_large_and_negative_boundaries(client):
+    # Very large numbers
+    res_large = await client.post("/add", json={"a": 1e9, "b": 2e9})
+    assert res_large.status_code == 200
+    assert res_large.json()["result"] == 3e9
+
+    # Symmetrical negative subtraction
+    res_neg = await client.post("/subtract", json={"a": -10, "b": -20})
+    assert res_neg.status_code == 200
+    assert res_neg.json()["result"] == 10
+'''
+            self.write_attack_script("test_calculator_attacks.py", test_attacks_py)
+
+            print(f"\\n[{self.name}] Executing Red-Team Attack Suite...")
+            cmd = [sys.executable, "-m", "pytest", str(self.adv_dir), "-v"]
+            env = {**os.environ, "PYTHONPATH": str(self.stage1_dir)}
+            result = subprocess.run(cmd, cwd=str(self.stage1_dir), env=env, capture_output=True, text=True)
+            print(result.stdout)
+
+            breached = result.returncode != 0
+            verdict = "BREACHED" if breached else "CLEARED"
+
+            report_content = f"""# Adversarial Red-Team Audit Report
+
+> **Auditor:** Ghost Auditor (Seat 3)  
+> **Status:** **{verdict}**  
+> **Audit Stance:** 100% Blind External Red-Team Protocol  
+
+---
+
+## 1. Executive Verdict
+- **Overall Verdict:** **{verdict}**
+- **Adversarial Vectors Executed:** 3 Threat Vectors (Zero-division exploit, payload type fuzzing, boundary scales)
+
+## 2. Attack Execution Logs
+```text
+{result.stdout.strip()}
+```
+
+## 3. Findings Summary
+{"Zero vulnerabilities detected. System demonstrated airtight invariant compliance." if not breached else "Vulnerabilities detected. Rejecting for remediation."}
+
+---
+Tagging **@Gatekeeper** for objective quality gate evaluation.
+"""
+            self.report_path.write_text(report_content, encoding="utf-8")
+            print(f"[{self.name}] Generated: {self.report_path.name}")
+            print(f"[{self.name}] Audit finished -> Verdict: {verdict} -> Tagging @Gatekeeper")
+            return {"verdict": verdict, "breached": breached}
+
         # 1. Adversarial Test Fixtures (conftest.py)
         conftest_py = '''import sys
 from pathlib import Path

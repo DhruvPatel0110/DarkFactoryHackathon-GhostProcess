@@ -49,18 +49,31 @@ class ArchitectAgent:
             f"Output comprehensive, production-ready markdown documents with zero placeholders."
         )
 
+        is_calc = "calculator" in task_prompt.lower()
+        if is_calc:
+            task_details = (
+                "1. Generate DESIGN.md detailing:\n"
+                "   - REST API interface contracts (/add, /subtract, /multiply, /divide)\n"
+                "   - Pydantic models for request and response\n"
+                "   - Error handling: division by zero returning HTTP 400 Bad Request\n"
+                "2. Generate WORK_ITEMS.md listing sequenced tasks (WI-01 to WI-03) for the Coder."
+            )
+        else:
+            task_details = (
+                "1. Generate DESIGN.md detailing:\n"
+                "   - Component topology & layer separation\n"
+                "   - Strict double-entry ledger invariants & mathematical conservation\n"
+                "   - SQLite tables, constraints, WAL mode, busy_timeout, and BEGIN IMMEDIATE write-locking\n"
+                "   - REST API interface contracts (health, wallets, transfers, state reset/import/export)\n"
+                "   - Exact decimal string parsing (reject >2 decimals, normalize <2 decimals)\n"
+                "   - Idempotency deduplication mechanism\n"
+                "2. Generate WORK_ITEMS.md listing sequenced, dependency-ordered tasks (WI-01 to WI-06) for the Coder."
+            )
+
         prompt = (
             f"Human Dispatch Task: {task_prompt}\n\n"
             f"Project Context & Requirements:\n{context}\n\n"
-            f"TASK:\n"
-            f"1. Generate DESIGN.md detailing:\n"
-            f"   - Component topology & layer separation\n"
-            f"   - Strict double-entry ledger invariants & mathematical conservation\n"
-            f"   - SQLite tables, constraints, WAL mode, busy_timeout, and BEGIN IMMEDIATE write-locking\n"
-            f"   - REST API interface contracts (health, wallets, transfers, state reset/import/export)\n"
-            f"   - Exact decimal string parsing (reject >2 decimals, normalize <2 decimals)\n"
-            f"   - Idempotency deduplication mechanism\n"
-            f"2. Generate WORK_ITEMS.md listing sequenced, dependency-ordered tasks (WI-01 to WI-06) for the Coder.\n\n"
+            f"TASK:\n{task_details}\n\n"
             f"Format your response with explicit delimiters:\n"
             f"---BEGIN DESIGN.MD---\n[Content]\n---END DESIGN.MD---\n\n"
             f"---BEGIN WORK_ITEMS.MD---\n[Content]\n---END WORK_ITEMS.MD---"
@@ -90,7 +103,23 @@ class ArchitectAgent:
             work_items_content = raw_output.split("---BEGIN WORK_ITEMS.MD---")[1].strip()
 
         if not work_items_content or len(work_items_content.strip()) < 100:
-            work_items_content = """# Sequenced Implementation Work Items
+            if is_calc:
+                work_items_content = """# Sequenced Implementation Work Items
+
+- [ ] **WI-01: Calculator REST API Endpoints**
+  - **Module:** `stage-1/app/main.py`
+  - **Criteria:** Implement `/add`, `/subtract`, `/multiply`, and `/divide` accepting `{ "a": float, "b": float }` returning `{ "result": float }`.
+
+- [ ] **WI-02: Error Handling & Invariant Enforcement**
+  - **Module:** `stage-1/app/main.py`
+  - **Criteria:** Explicit HTTP 400 Bad Request on division by zero (`b == 0`).
+
+- [ ] **WI-03: Developer Unit Test Suite**
+  - **Module:** `stage-1/tests/test_calculator.py`
+  - **Criteria:** Comprehensive unit tests for all arithmetic operations and zero-division error handling with 100% pytest pass rate.
+"""
+            else:
+                work_items_content = """# Sequenced Implementation Work Items
 
 - [ ] **WI-01: Foundation & Database Persistence Engine**
   - **Module:** `stage-1/app/config.py`, `stage-1/app/database.py`, `stage-1/app/models.py`
