@@ -56,60 +56,66 @@ class ResilientLLMClient:
         Generates content using Groq as primary, falling back to Gemini if needed.
         Guarantees paced execution with rate limiting and exponential backoff.
         """
-        # 1. Try Groq Primary (if available and not forced fallback)
+        # 1. Try Groq Primary & Backup (if available and not forced fallback)
         if self.groq_client and not force_fallback:
-            for attempt in range(1, max_retries + 1):
-                try:
-                    await self.groq_limiter.acquire()
-                    
-                    messages = []
-                    if system_prompt:
-                        messages.append({"role": "system", "content": system_prompt})
-                    messages.append({"role": "user", "content": prompt})
+            for model_candidate in [GROQ_PRIMARY_MODEL, GROQ_BACKUP_MODEL]:
+                for attempt in range(1, max_retries + 1):
+                    try:
+                        await self.groq_limiter.acquire()
+                        
+                        messages = []
+                        if system_prompt:
+                            messages.append({"role": "system", "content": system_prompt})
+                        messages.append({"role": "user", "content": prompt})
 
-                    # Execute in async thread pool to prevent event loop blocking
-                    response = await asyncio.to_thread(
-                        self.groq_client.chat.completions.create,
-                        model=GROQ_PRIMARY_MODEL,
-                        messages=messages,
-                        temperature=temperature,
-                    )
-                    content = response.choices[0].message.content
-                    if content:
-                        return content.strip()
-                except Exception as e:
-                    err_str = str(e).lower()
-                    print(f"   [GROQ ATTEMPT {attempt}/{max_retries}] Exception: {e}")
-                    if "rate" in err_str or "429" in err_str:
-                        backoff = (2 ** attempt) + 1.0
-                        print(f"   [RATE LIMIT] Backing off Groq for {backoff:.1f}s...")
-                        await asyncio.sleep(backoff)
-                    else:
-                        # Non-rate-limit error (e.g. timeout/500)
-                        await asyncio.sleep(2.0)
-            
+                        # Execute in async thread pool to prevent event loop blocking
+                        response = await asyncio.to_thread(
+                            self.groq_client.chat.completions.create,
+                            model=model_candidate,
+                            messages=messages,
+                            temperature=temperature,
+                            max_tokens=4096,
+                        )
+                        content = response.choices[0].message.content
+                        if content:
+                            return content.strip()
+                    except Exception as e:
+                        err_str = str(e).lower()
+                        print(f"   [GROQ {model_candidate} ATTEMPT {attempt}/{max_retries}] Exception: {e}")
+                        if "413" in err_str or "request too large" in err_str:
+                            print(f"   [GROQ {model_candidate}] Prompt exceeds model token limit. Switching model immediately...")
+                            break
+                        elif "rate" in err_str or "429" in err_str:
+                            backoff = (2 ** attempt) + 1.0
+                            print(f"   [RATE LIMIT] Backing off Groq for {backoff:.1f}s...")
+                            await asyncio.sleep(backoff)
+                        else:
+                            await asyncio.sleep(1.5)
+                
             print("   [FALLBACK] Groq attempts exhausted. Switching to Google Gemini fallback...")
 
-        # 2. Fallback to Gemini
+        # 2. Fallback to Gemini (trying configured fallback followed by lightweight fallback)
         if self.gemini_client:
-            for attempt in range(1, max_retries + 1):
-                try:
-                    await self.gemini_limiter.acquire()
-                    
-                    full_prompt = prompt
-                    if system_prompt:
-                        full_prompt = f"System Instructions:\n{system_prompt}\n\nTask:\n{prompt}"
+            gemini_candidates = [GEMINI_FALLBACK_MODEL, "gemini-2.5-flash-lite", "gemini-3.7-flash"]
+            for g_model in gemini_candidates:
+                for attempt in range(1, max_retries + 1):
+                    try:
+                        await self.gemini_limiter.acquire()
+                        
+                        full_prompt = prompt
+                        if system_prompt:
+                            full_prompt = f"System Instructions:\n{system_prompt}\n\nTask:\n{prompt}"
 
-                    response = await asyncio.to_thread(
-                        self.gemini_client.models.generate_content,
-                        model=GEMINI_FALLBACK_MODEL,
-                        contents=full_prompt,
-                    )
-                    if response and response.text:
-                        return response.text.strip()
-                except Exception as e:
-                    print(f"   [GEMINI ATTEMPT {attempt}/{max_retries}] Exception: {e}")
-                    await asyncio.sleep((2 ** attempt) + 1.0)
+                        response = await asyncio.to_thread(
+                            self.gemini_client.models.generate_content,
+                            model=g_model,
+                            contents=full_prompt,
+                        )
+                        if response and response.text:
+                            return response.text.strip()
+                    except Exception as e:
+                        print(f"   [GEMINI {g_model} ATTEMPT {attempt}/{max_retries}] Exception: {e}")
+                        await asyncio.sleep((2 ** attempt) + 1.0)
 
         raise RuntimeError("All LLM providers (Groq and Gemini) failed to generate a response.")
 
