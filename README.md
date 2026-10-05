@@ -26,21 +26,37 @@
 GhostProcess coordinates 4 specialized seats inside **BAND Desktop** (`DarkFactory-GhostProcess`):
 
 ```mermaid
-flowchart TD
-    Human([Single Human Task Dispatch]) -->|Prompt| Arch[Seat 1: Architect]
-    Arch -->|DESIGN.md + WORK_ITEMS.md| Coder[Seat 2: Coder]
-    Coder -->|Code + 7/7 Unit Tests + HANDOFF.md| Auditor[Seat 3: Ghost Auditor]
-    Arch -.->|Pure Spec (BLIND)| Auditor
-    Auditor -->|6 Chaos Attacks + AUDIT_REPORT.md| Gate[Seat 4: Gatekeeper]
-    Coder -.->|Handoff Evidence| Gate
-    Gate -->|Verify Dual Evidence & Invariants| Decision{All Clear?}
-    Decision -->|Reject| Coder
-    Decision -->|Accept| Release([RELEASE.md: Certified for Production])
+sequenceDiagram
+    autonumber
+    actor Human as Human Dispatcher
+    participant Arch as Seat 1: Architect
+    participant Coder as Seat 2: Coder
+    participant Auditor as Seat 3: Ghost Auditor (Blind Red Team)
+    participant Gate as Seat 4: Gatekeeper (Quality Arbiter)
 
-    classDef seat fill:#141414,stroke:#dc2626,stroke-width:2px,color:#fafafa;
-    classDef gate fill:#141414,stroke:#16a34a,stroke-width:2px,color:#fafafa;
-    class Arch,Coder,Auditor seat;
-    class Gate,Decision gate;
+    Human->>Arch: Dispatch initial prompt into BAND room
+    Note over Arch: Ingests Generic Mandate & Context
+    Arch->>Arch: Synthesizes DESIGN.md & WORK_ITEMS.md
+    Arch->>Coder: Posts architecture summary & tags @Coder
+
+    Note over Coder: Ingests DESIGN.md & Mandate
+    Coder->>Coder: Builds FastAPI app, SQLite WAL schemas, & tests
+    Coder->>Coder: Runs 7/7 unit tests & writes HANDOFF.md
+    Coder->>Auditor: Posts completion & tags @Ghost-Auditor
+
+    Note over Auditor: BLIND AUDIT: Reads DESIGN.md only
+    Auditor->>Auditor: Crafts 6 destructive adversarial attack vectors
+    Auditor->>Auditor: Attacks live code & outputs AUDIT_REPORT.md
+    Auditor->>Gate: Posts audit verdict & tags @Gatekeeper
+
+    Note over Gate: Independent Multi-Seat Verification
+    Gate->>Gate: Independently runs Developer + Adversarial Suites
+    alt Flaws Detected (Remediation Cycle < 3)
+        Gate->>Coder: Issues REJECTION.md & tags @Coder for patch
+    else All Tests Pass & Zero Invariant Breaches
+        Gate->>Gate: Issues RELEASE.md
+        Gate->>Human: Signals factory release clearance
+    end
 ```
 
 ### The 4 Autonomous Factory Seats
